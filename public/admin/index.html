@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <title>Quản trị hồ sơ — Sanvendo</title>
+  <link rel="stylesheet" href="/admin/admin.css">
+  <script src="/admin/admin.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Về trang chủ Sanvendo">
+      <span class="brand-mark">S</span>
+      <span>
+        <strong>Sanvendo</strong>
+        <small>Quản trị tuyển dụng</small>
+      </span>
+    </a>
+
+    <div class="account">
+      <span class="account-email" id="adminEmail">Đang xác thực…</span>
+      <a class="logout-link" id="logoutLink" href="/cdn-cgi/access/logout">Đăng xuất</a>
+    </div>
+  </header>
+
+  <main class="page-shell">
+    <section class="page-heading">
+      <div>
+        <p class="eyebrow">R2 PRIVATE CV</p>
+        <h1>Hồ sơ ứng viên</h1>
+        <p class="heading-copy">
+          Xem thông tin ứng viên và tải CV từ kho R2 riêng tư.
+        </p>
+      </div>
+
+      <button class="button button-secondary" id="refreshButton" type="button">
+        Làm mới
+      </button>
+    </section>
+
+    <section class="stats-grid" aria-label="Thống kê hồ sơ">
+      <article class="stat-card">
+        <span>Đang hiển thị</span>
+        <strong id="visibleCount">0</strong>
+      </article>
+      <article class="stat-card">
+        <span>Dung lượng</span>
+        <strong id="visibleSize">0 B</strong>
+      </article>
+      <article class="stat-card">
+        <span>Cập nhật gần nhất</span>
+        <strong class="stat-date" id="lastUpdated">—</strong>
+      </article>
+    </section>
+
+    <section class="panel">
+      <form class="toolbar" id="searchForm" role="search">
+        <label class="search-field">
+          <span class="sr-only">Tìm kiếm ứng viên</span>
+          <input
+            id="searchInput"
+            type="search"
+            name="q"
+            autocomplete="off"
+            maxlength="160"
+            placeholder="Tìm theo tên, email, điện thoại, vị trí hoặc mã hồ sơ"
+          >
+        </label>
+        <button class="button button-primary" type="submit">Tìm kiếm</button>
+        <button class="button button-ghost" id="clearSearchButton" type="button">Xóa lọc</button>
+      </form>
+
+      <div class="status-message hidden" id="statusMessage" role="status"></div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Ứng viên</th>
+              <th>Liên hệ</th>
+              <th>Vị trí mong muốn</th>
+              <th>Ngày gửi</th>
+              <th>CV</th>
+            </tr>
+          </thead>
+          <tbody id="candidateRows"></tbody>
+        </table>
+      </div>
+
+      <div class="empty-state hidden" id="emptyState">
+        <div class="empty-icon">CV</div>
+        <h2>Chưa tìm thấy hồ sơ</h2>
+        <p>Hồ sơ mới sẽ xuất hiện tại đây sau khi ứng viên gửi CV.</p>
+      </div>
+
+      <div class="loading-state" id="loadingState" aria-live="polite">
+        <span class="spinner" aria-hidden="true"></span>
+        <span>Đang tải hồ sơ…</span>
+      </div>
+
+      <footer class="pagination hidden" id="pagination">
+        <span id="scanSummary"></span>
+        <button class="button button-secondary" id="loadMoreButton" type="button">
+          Tải thêm
+        </button>
+      </footer>
+    </section>
+  </main>
+</body>
+</html>
