@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    name="description"
+    content="Sanvendo hỗ trợ doanh nghiệp tìm kiếm, sàng lọc và tuyển dụng nhân sự theo yêu cầu."
+  />
+  <title>Sanvendo — Tuyển dụng & Headhunting theo yêu cầu</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a href="#top" class="brand" aria-label="Sanvendo">
+        <span class="brand-mark">S</span>
+        <span>SANVENDO</span>
+      </a>
+
+      <button class="menu-toggle" id="menuToggle" aria-label="Mở menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <nav class="main-nav" id="mainNav">
+        <a href="#categories">Ngành nghề</a>
+        <a href="#services">Dịch vụ</a>
+        <a href="#jobs">Việc làm</a>
+        <a href="#process">Quy trình</a>
+        <a href="#candidates">Ứng viên</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="btn btn-ghost" data-open-modal="candidateModal">Gửi CV</button>
+        <button class="btn btn-primary" data-open-modal="requestModal">Đăng yêu cầu tuyển dụng</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-glow hero-glow-one"></div>
+      <div class="hero-glow hero-glow-two"></div>
+
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <span class="eyebrow">Recruitment · Headhunting · Direct Hire</span>
+          <h1>Tìm đúng người cho đúng vị trí.</h1>
+          <p class="hero-lead">
+            Sanvendo tìm kiếm, sàng lọc và giới thiệu ứng viên theo yêu cầu.
+            Doanh nghiệp trực tiếp lựa chọn, ký hợp đồng và quản lý nhân sự.
+          </p>
+
+          <form class="hero-search" id="heroSearch">
+            <label class="search-field">
+              <span class="search-icon" aria-hidden="true">⌕</span>
+              <input
+                type="search"
+                id="heroSearchInput"
+                placeholder="Bạn đang cần tuyển vị trí nào?"
+                autocomplete="off"
+              />
+            </label>
+            <button class="btn btn-dark" type="submit">Tìm nhân sự</button>
+          </form>
+
+          <div class="popular-searches">
+            <span>Phổ biến:</span>
+            <button type="button" data-search="Nhân viên kinh doanh">Kinh doanh</button>
+            <button type="button" data-search="Kế toán tổng hợp">Kế toán</button>
+            <button type="button" data-search="Digital Marketing">Marketing</button>
+            <button type="button" data-search="Kỹ sư sản xuất">Kỹ thuật</button>
+          </div>
+
+          <div class="hero-stats">
+            <div>
+              <strong>48h</strong>
+              <span>Phản hồi yêu cầu ban đầu</span>
+            </div>
+            <div>
+              <strong>1 lần</strong>
+              <span>Phí dịch vụ theo thỏa thuận</span>
+            </div>
+            <div>
+              <strong>Trực tiếp</strong>
+              <span>Doanh nghiệp ký hợp đồng với ứng viên</span>
+            </div>
+          </div>
+        </div>
+
+        <aside class="hero-panel">
+          <div class="panel-header">
+            <div>
+              <span class="status-dot"></span>
+              <span>Yêu cầu đang được quan tâm</span>
+            </div>
+            <span class="mini-badge">Mới</span>
+          </div>
+
+          <article class="featured-card">
+            <div class="featured-top">
+              <div class="company-logo">SV</div>
+              <div>
+                <h3>Trưởng phòng Kinh doanh</h3>
+                <p>TP. Hồ Chí Minh · Toàn thời gian</p>
+              </div>
+            </div>
+
+            <div class="tag-row">
+              <span>B2B</span>
+              <span>Quản lý đội nhóm</span>
+              <span>5+ năm</span>
+            </div>
+
+            <div class="featured-info">
+              <div>
+                <small>Mức lương</small>
+                <strong>Thỏa thuận</strong>
+              </div>
+              <div>
+                <small>Hồ sơ mục tiêu</small>
+                <strong>5–8 ứng viên</strong>
+              </div>
+            </div>
+
+            <button class="btn btn-primary btn-block" data-open-modal="requestModal">
+              Gửi yêu cầu tương tự
+            </button>
+          </article>
+
+          <div class="mini-cards">
+            <div class="mini-card">
+              <span class="mini-icon">✓</span>
+              <div>
+                <strong>Sàng lọc trước</strong>
+                <p>Chỉ giới thiệu hồ sơ phù hợp tiêu chí.</p>
+              </div>
+            </div>
+            <div class="mini-card">
+              <span class="mini-icon">↻</span>
+              <div>
+                <strong>Chính sách thay thế</strong>
+                <p>Áp dụng theo gói dịch vụ đã thống nhất.</p>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="trusted-strip">
+      <div class="container trusted-content">
+        <span>Phù hợp cho doanh nghiệp cần tuyển:</span>
+        <div class="trusted-items">
+          <strong>Nhân viên</strong>
+          <strong>Chuyên viên</strong>
+          <strong>Quản lý</strong>
+          <strong>Tuyển số lượng</strong>
+          <strong>Vị trí khó tuyển</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="categories">
+      <div class="container">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Khám phá theo lĩnh vực</span>
+            <h2>Tìm nhân sự theo ngành nghề</h2>
+          </div>
+          <a href="#jobs" class="text-link">Xem tất cả vị trí →</a>
+        </div>
+
+        <div class="category-grid">
+          <button class="category-card" data-category="Kinh doanh">
+            <span class="category-icon">↗</span>
+            <strong>Kinh doanh & Bán hàng</strong>
+            <small>24 vị trí tham khảo</small>
+          </button>
+          <button class="category-card" data-category="Marketing">
+            <span class="category-icon">✦</span>
+            <strong>Marketing & Truyền thông</strong>
+            <small>18 vị trí tham khảo</small>
+          </button>
+          <button class="category-card" data-category="Kế toán">
+            <span class="category-icon">₫</span>
+            <strong>Kế toán & Tài chính</strong>
+            <small>16 vị trí tham khảo</small>
+          </button>
+          <button class="category-card" data-category="Nhân sự">
+            <span class="category-icon">◎</span>
+            <strong>Hành chính & Nhân sự</strong>
+            <small>13 vị trí tham khảo</small>
+          </button>
+          <button class="category-card" data-category="Công nghệ">
+            <span class="category-icon">&lt;/&gt;</span>
+            <strong>Công nghệ thông tin</strong>
+            <small>21 vị trí tham khảo</small>
+          </button>
+          <button class="category-card" data-category="Kỹ thuật">
+            <span class="category-icon">⚙</span>
+            <strong>Kỹ thuật & Sản xuất</strong>
+            <small>27 vị trí tham khảo</small>
+          </button>
+          <button class="category-card" data-category="Logistics">
+            <span class="category-icon">▣</span>
+            <strong>Kho vận & Chuỗi cung ứng</strong>
+            <small>15 vị trí tham khảo</small>
+          </button>
+          <button class="category-card" data-category="Chăm sóc khách hàng">
+            <span class="category-icon">◌</span>
+            <strong>Chăm sóc khách hàng</strong>
+            <small>11 vị trí tham khảo</small>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-soft" id="services">
+      <div class="container">
+        <div class="section-heading center">
+          <div>
+            <span class="eyebrow">Giải pháp tuyển dụng</span>
+            <h2>Chọn dịch vụ phù hợp với nhu cầu</h2>
+            <p>Sanvendo triển khai theo vị trí, độ khó, số lượng và thời gian doanh nghiệp cần nhân sự.</p>
+          </div>
+        </div>
+
+        <div class="service-grid">
+          <article class="service-card">
+            <span class="service-number">01</span>
+            <h3>Tuyển dụng tiêu chuẩn</h3>
+            <p>Tìm kiếm và sàng lọc các vị trí nhân viên, chuyên viên phổ biến.</p>
+            <ul>
+              <li>Tiếp nhận và phân tích JD</li>
+              <li>Tìm kiếm ứng viên phù hợp</li>
+              <li>Sàng lọc và xác nhận nhu cầu</li>
+            </ul>
+            <button class="text-button" data-open-modal="requestModal">Nhận báo giá →</button>
+          </article>
+
+          <article class="service-card featured-service">
+            <span class="popular-badge">Phổ biến</span>
+            <span class="service-number">02</span>
+            <h3>Headhunting chuyên sâu</h3>
+            <p>Chủ động tiếp cận ứng viên giỏi cho vị trí chuyên môn hoặc quản lý.</p>
+            <ul>
+              <li>Phân tích thị trường ứng viên</li>
+              <li>Tìm kiếm và tiếp cận chủ động</li>
+              <li>Báo cáo hồ sơ chi tiết</li>
+            </ul>
+            <button class="text-button" data-open-modal="requestModal">Trao đổi nhu cầu →</button>
+          </article>
+
+          <article class="service-card">
+            <span class="service-number">03</span>
+            <h3>Tuyển dụng số lượng</h3>
+            <p>Phù hợp với bán lẻ, sản xuất, kho vận hoặc mở rộng chi nhánh.</p>
+            <ul>
+              <li>Lập kế hoạch nguồn ứng viên</li>
+              <li>Sàng lọc tập trung</li>
+              <li>Theo dõi quá trình nhận việc</li>
+            </ul>
+            <button class="text-button" data-open-modal="requestModal">Gửi nhu cầu →</button>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="jobs">
+      <div class="container">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Vị trí tham khảo</span>
+            <h2>Các nhu cầu tuyển dụng nổi bật</h2>
+          </div>
+
+          <div class="filter-wrap">
+            <input type="search" id="jobFilter" placeholder="Lọc theo vị trí hoặc ngành..." />
+            <select id="locationFilter" aria-label="Lọc theo địa điểm">
+              <option value="">Tất cả địa điểm</option>
+              <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
+              <option value="Bình Dương">Bình Dương</option>
+              <option value="Đồng Nai">Đồng Nai</option>
+              <option value="Hà Nội">Hà Nội</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="job-grid" id="jobGrid">
+          <article class="job-card" data-title="Nhân viên kinh doanh B2B" data-category="Kinh doanh" data-location="TP. Hồ Chí Minh">
+            <div class="job-card-top">
+              <span class="job-logo">KD</span>
+              <button class="save-job" aria-label="Lưu vị trí">♡</button>
+            </div>
+            <span class="job-category">Kinh doanh</span>
+            <h3>Nhân viên kinh doanh B2B</h3>
+            <p>TP. Hồ Chí Minh · 1–3 năm kinh nghiệm</p>
+            <div class="job-footer">
+              <strong>15–25 triệu</strong>
+              <button data-open-modal="candidateModal" data-position="Nhân viên kinh doanh B2B">Ứng tuyển</button>
+            </div>
+          </article>
+
+          <article class="job-card" data-title="Kế toán tổng hợp" data-category="Kế toán" data-location="Bình Dương">
+            <div class="job-card-top">
+              <span class="job-logo">KT</span>
+              <button class="save-job" aria-label="Lưu vị trí">♡</button>
+            </div>
+            <span class="job-category">Kế toán</span>
+            <h3>Kế toán tổng hợp</h3>
+            <p>Bình Dương · 2+ năm kinh nghiệm</p>
+            <div class="job-footer">
+              <strong>14–20 triệu</strong>
+              <button data-open-modal="candidateModal" data-position="Kế toán tổng hợp">Ứng tuyển</button>
+            </div>
+          </article>
+
+          <article class="job-card" data-title="Trưởng phòng Marketing" data-category="Marketing" data-location="TP. Hồ Chí Minh">
+            <div class="job-card-top">
+              <span class="job-logo">MKT</span>
+              <button class="save-job" aria-label="Lưu vị trí">♡</button>
+            </div>
+            <span class="job-category">Marketing</span>
+            <h3>Trưởng phòng Marketing</h3>
+            <p>TP. Hồ Chí Minh · Kinh nghiệm quản lý</p>
+            <div class="job-footer">
+              <strong>Thỏa thuận</strong>
+              <button data-open-modal="candidateModal" data-position="Trưởng phòng Marketing">Ứng tuyển</button>
+            </div>
+          </article>
+
+          <article class="job-card" data-title="Kỹ sư sản xuất" data-category="Kỹ thuật" data-location="Đồng Nai">
+            <div class="job-card-top">
+              <span class="job-logo">KS</span>
+              <button class="save-job" aria-label="Lưu vị trí">♡</button>
+            </div>
+            <span class="job-category">Kỹ thuật</span>
+            <h3>Kỹ sư sản xuất</h3>
+            <p>Đồng Nai · 2–4 năm kinh nghiệm</p>
+            <div class="job-footer">
+              <strong>18–28 triệu</strong>
+              <button data-open-modal="candidateModal" data-position="Kỹ sư sản xuất">Ứng tuyển</button>
+            </div>
+          </article>
+
+          <article class="job-card" data-title="Chuyên viên tuyển dụng" data-category="Nhân sự" data-location="Hà Nội">
+            <div class="job-card-top">
+              <span class="job-logo">HR</span>
+              <button class="save-job" aria-label="Lưu vị trí">♡</button>
+            </div>
+            <span class="job-category">Nhân sự</span>
+            <h3>Chuyên viên tuyển dụng</h3>
+            <p>Hà Nội · 1–2 năm kinh nghiệm</p>
+            <div class="job-footer">
+              <strong>13–18 triệu</strong>
+              <button data-open-modal="candidateModal" data-position="Chuyên viên tuyển dụng">Ứng tuyển</button>
+            </div>
+          </article>
+
+          <article class="job-card" data-title="Lập trình viên Frontend" data-category="Công nghệ" data-location="TP. Hồ Chí Minh">
+            <div class="job-card-top">
+              <span class="job-logo">FE</span>
+              <button class="save-job" aria-label="Lưu vị trí">♡</button>
+            </div>
+            <span class="job-category">Công nghệ</span>
+            <h3>Lập trình viên Frontend</h3>
+            <p>TP. Hồ Chí Minh · React / JavaScript</p>
+            <div class="job-footer">
+              <strong>20–35 triệu</strong>
+              <button data-open-modal="candidateModal" data-position="Lập trình viên Frontend">Ứng tuyển</button>
+            </div>
+          </article>
+        </div>
+
+        <p class="empty-state hidden" id="emptyState">Không tìm thấy vị trí phù hợp với bộ lọc hiện tại.</p>
+      </div>
+    </section>
+
+    <section class="section section-dark" id="process">
+      <div class="container">
+        <div class="section-heading light">
+          <div>
+            <span class="eyebrow">Quy trình minh bạch</span>
+            <h2>Từ yêu cầu tuyển dụng đến nhân sự nhận việc</h2>
+          </div>
+          <button class="btn btn-light" data-open-modal="requestModal">Bắt đầu tuyển dụng</button>
+        </div>
+
+        <div class="process-grid">
+          <article>
+            <span>01</span>
+            <h3>Gửi yêu cầu</h3>
+            <p>Doanh nghiệp cung cấp vị trí, tiêu chí, mức lương và thời gian cần nhân sự.</p>
+          </article>
+          <article>
+            <span>02</span>
+            <h3>Thống nhất phương án</h3>
+            <p>Sanvendo xác nhận phạm vi dịch vụ, phí, thời gian và chính sách thay thế.</p>
+          </article>
+          <article>
+            <span>03</span>
+            <h3>Tìm và sàng lọc</h3>
+            <p>Ứng viên được tiếp cận, kiểm tra thông tin và đánh giá mức độ phù hợp.</p>
+          </article>
+          <article>
+            <span>04</span>
+            <h3>Tuyển dụng trực tiếp</h3>
+            <p>Doanh nghiệp phỏng vấn, lựa chọn và ký hợp đồng trực tiếp với ứng viên.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="candidates">
+      <div class="container candidate-banner">
+        <div>
+          <span class="eyebrow">Dành cho ứng viên</span>
+          <h2>Cơ hội phù hợp có thể đang chờ bạn.</h2>
+          <p>
+            Tạo hồ sơ để Sanvendo có thể giới thiệu bạn đến các doanh nghiệp có nhu cầu phù hợp.
+            Ứng viên không phải trả phí.
+          </p>
+          <div class="candidate-actions">
+            <button class="btn btn-primary" data-open-modal="candidateModal">Tải CV lên</button>
+            <a class="btn btn-ghost" href="#jobs">Xem việc làm</a>
+          </div>
+        </div>
+
+        <div class="candidate-card">
+          <div class="candidate-avatar">CV</div>
+          <div>
+            <strong>Hồ sơ của bạn được bảo mật</strong>
+            <p>Chỉ chuyển đến nhà tuyển dụng trong phạm vi phù hợp và theo sự đồng ý.</p>
+          </div>
+          <ul>
+            <li>Miễn phí tạo hồ sơ</li>
+            <li>Chủ động lựa chọn cơ hội</li>
+            <li>Ký hợp đồng trực tiếp với doanh nghiệp</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-soft">
+      <div class="container">
+        <div class="section-heading center">
+          <div>
+            <span class="eyebrow">Câu hỏi thường gặp</span>
+            <h2>Thông tin doanh nghiệp thường quan tâm</h2>
+          </div>
+        </div>
+
+        <div class="faq-list">
+          <article class="faq-item">
+            <button class="faq-question">
+              Sanvendo có trực tiếp ký hợp đồng lao động với ứng viên không?
+              <span>+</span>
+            </button>
+            <div class="faq-answer">
+              <p>
+                Không. Trong mô hình tuyển dụng trực tiếp, doanh nghiệp tuyển dụng sẽ lựa chọn
+                và ký hợp đồng lao động trực tiếp với ứng viên.
+              </p>
+            </div>
+          </article>
+
+          <article class="faq-item">
+            <button class="faq-question">
+              Doanh nghiệp thanh toán phí khi nào?
+              <span>+</span>
+            </button>
+            <div class="faq-answer">
+              <p>
+                Thời điểm và điều kiện thanh toán được quy định trong hợp đồng dịch vụ.
+                Phí thường phát sinh khi ứng viên đáp ứng điều kiện tuyển dụng thành công.
+              </p>
+            </div>
+          </article>
+
+          <article class="faq-item">
+            <button class="faq-question">
+              Sanvendo có chính sách thay thế nhân sự không?
+              <span>+</span>
+            </button>
+            <div class="faq-answer">
+              <p>
+                Có thể áp dụng tùy theo gói dịch vụ, vị trí tuyển dụng và điều kiện đã được hai bên thống nhất.
+              </p>
+            </div>
+          </article>
+
+          <article class="faq-item">
+            <button class="faq-question">
+              Ứng viên có phải trả phí không?
+              <span>+</span>
+            </button>
+            <div class="faq-answer">
+              <p>
+                Không. Ứng viên không phải trả phí để gửi CV, ứng tuyển hoặc được giới thiệu đến doanh nghiệp.
+              </p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="final-cta">
+      <div class="container final-cta-inner">
+        <div>
+          <span class="eyebrow">Bắt đầu ngay</span>
+          <h2>Để Sanvendo tìm kiếm nhân sự phù hợp cho doanh nghiệp của bạn.</h2>
+        </div>
+        <button class="btn btn-light btn-large" data-open-modal="requestModal">
+          Đăng yêu cầu tuyển dụng
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <a href="#top" class="brand">
+          <span class="brand-mark">S</span>
+          <span>SANVENDO</span>
+        </a>
+        <p>Đối tác tuyển dụng theo yêu cầu cho doanh nghiệp.</p>
+      </div>
+
+      <div>
+        <h4>Dành cho doanh nghiệp</h4>
+        <a href="#services">Dịch vụ tuyển dụng</a>
+        <a href="#process">Quy trình</a>
+        <button data-open-modal="requestModal">Nhận báo giá</button>
+      </div>
+
+      <div>
+        <h4>Dành cho ứng viên</h4>
+        <a href="#jobs">Tìm việc làm</a>
+        <button data-open-modal="candidateModal">Gửi CV</button>
+        <a href="#candidates">Quyền lợi ứng viên</a>
+      </div>
+
+      <div>
+        <h4>Thông tin</h4>
+        <a href="#">Giới thiệu</a>
+        <a href="#">Chính sách bảo mật</a>
+        <a href="#">Điều khoản sử dụng</a>
+      </div>
+    </div>
+
+    <div class="container footer-bottom">
+      <span>© 2026 Sanvendo. All rights reserved.</span>
+      <span>Recruitment · Headhunting · Direct Hire</span>
+    </div>
+  </footer>
+
+  <div class="modal" id="requestModal" aria-hidden="true">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="requestModalTitle">
+      <button class="modal-close" data-close-modal aria-label="Đóng">×</button>
+      <span class="eyebrow">Dành cho doanh nghiệp</span>
+      <h2 id="requestModalTitle">Gửi yêu cầu tuyển dụng</h2>
+      <p>Điền thông tin cơ bản. Sanvendo sẽ liên hệ để xác nhận nhu cầu và báo giá.</p>
+
+      <form class="modal-form" id="requestForm">
+        <div class="form-grid">
+          <label>
+            <span>Tên doanh nghiệp *</span>
+            <input type="text" name="company" required />
+          </label>
+          <label>
+            <span>Người liên hệ *</span>
+            <input type="text" name="contact" required />
+          </label>
+          <label>
+            <span>Số điện thoại *</span>
+            <input type="tel" name="phone" required />
+          </label>
+          <label>
+            <span>Email công việc *</span>
+            <input type="email" name="email" required />
+          </label>
+          <label class="full">
+            <span>Vị trí cần tuyển *</span>
+            <input type="text" name="position" required />
+          </label>
+          <label>
+            <span>Số lượng</span>
+            <input type="number" name="quantity" min="1" value="1" />
+          </label>
+          <label>
+            <span>Địa điểm làm việc</span>
+            <input type="text" name="location" />
+          </label>
+          <label>
+            <span>Mức lương dự kiến</span>
+            <input type="text" name="salary" />
+          </label>
+          <label>
+            <span>Thời gian cần nhân sự</span>
+            <input type="text" name="deadline" placeholder="Ví dụ: trong 30 ngày" />
+          </label>
+          <label class="full">
+            <span>Mô tả yêu cầu</span>
+            <textarea name="description" rows="4"></textarea>
+          </label>
+        </div>
+
+        <label class="consent">
+          <input type="checkbox" required />
+          <span>Tôi đồng ý để Sanvendo liên hệ tư vấn về yêu cầu tuyển dụng này.</span>
+        </label>
+
+        <button class="btn btn-primary btn-block" type="submit">Gửi yêu cầu</button>
+      </form>
+
+      <div class="success-message hidden" id="requestSuccess">
+        <div class="success-icon">✓</div>
+        <h3>Đã ghi nhận yêu cầu</h3>
+        <p>Đây là bản demo giao diện. Bạn có thể kết nối form với email, Google Sheets hoặc CRM sau.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="candidateModal" aria-hidden="true">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="candidateModalTitle">
+      <button class="modal-close" data-close-modal aria-label="Đóng">×</button>
+      <span class="eyebrow">Dành cho ứng viên</span>
+      <h2 id="candidateModalTitle">Gửi hồ sơ ứng viên</h2>
+      <p>Tải CV trực tiếp lên hệ thống bảo mật của Sanvendo. Ứng viên không phải trả phí.</p>
+
+      <form
+        class="modal-form"
+        id="candidateForm"
+        method="post"
+        enctype="multipart/form-data"
+        novalidate
+      >
+        <div class="form-grid">
+          <label>
+            <span>Họ và tên *</span>
+            <input
+              type="text"
+              name="fullName"
+              autocomplete="name"
+              maxlength="100"
+              required
+            />
+          </label>
+
+          <label>
+            <span>Số điện thoại *</span>
+            <input
+              type="tel"
+              name="phone"
+              autocomplete="tel"
+              maxlength="30"
+              required
+            />
+          </label>
+
+          <label class="full">
+            <span>Email *</span>
+            <input
+              type="email"
+              name="email"
+              autocomplete="email"
+              maxlength="160"
+              required
+            />
+          </label>
+
+          <label>
+            <span>Vị trí mong muốn</span>
+            <input
+              type="text"
+              name="desiredPosition"
+              maxlength="120"
+            />
+          </label>
+
+          <label>
+            <span>Khu vực làm việc</span>
+            <input
+              type="text"
+              name="desiredLocation"
+              maxlength="120"
+            />
+          </label>
+
+          <label class="full">
+            <span>File CV *</span>
+            <input
+              class="file-input"
+              id="cvFile"
+              type="file"
+              name="cv"
+              accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              required
+            />
+            <small class="field-help">
+              Chấp nhận PDF, DOC hoặc DOCX. Dung lượng tối đa 10 MB.
+            </small>
+          </label>
+
+          <label class="hp-field" aria-hidden="true">
+            <span>Website</span>
+            <input
+              type="text"
+              name="website"
+              tabindex="-1"
+              autocomplete="off"
+            />
+          </label>
+        </div>
+
+        <label class="consent">
+          <input type="checkbox" name="consent" value="yes" required />
+          <span>
+            Tôi đồng ý để Sanvendo xử lý hồ sơ và giới thiệu đến nhà tuyển dụng phù hợp.
+          </span>
+        </label>
+
+        <p class="form-error hidden" id="candidateError" role="alert"></p>
+
+        <button class="btn btn-primary btn-block" id="candidateSubmit" type="submit">
+          Gửi hồ sơ
+        </button>
+      </form>
+
+      <div class="success-message hidden" id="candidateSuccess">
+        <div class="success-icon">✓</div>
+        <h3>CV đã được gửi thành công</h3>
+        <p>
+          Mã hồ sơ: <strong id="candidateReference"></strong>.
+          Sanvendo sẽ liên hệ khi có cơ hội phù hợp.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>

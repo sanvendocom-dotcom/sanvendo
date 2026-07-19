@@ -1,0 +1,13 @@
+{
+  "name": "sanvendo-pages-r2",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Sanvendo recruitment website with Cloudflare Pages Functions and private R2 CV upload.",
+  "scripts": {
+    "dev": "wrangler pages dev public",
+    "deploy": "wrangler pages deploy public --project-name sanvendo"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

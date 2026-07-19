@@ -1,0 +1,12 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "sanvendo",
+  "pages_build_output_dir": "./public",
+  "compatibility_date": "2026-07-19",
+  "r2_buckets": [
+    {
+      "binding": "CV_BUCKET",
+      "bucket_name": "sanvendo-private-cv"
+    }
+  ]
+}
