@@ -144,24 +144,81 @@ document.querySelectorAll(".faq-question").forEach((button) => {
   });
 });
 
-function setupDemoForm(formId, successId) {
-  const form = document.getElementById(formId);
-  const success = document.getElementById(successId);
+const requestForm = document.getElementById("requestForm");
+const requestSubmit = document.getElementById("requestSubmit");
+const requestError = document.getElementById("requestError");
+const requestSuccess = document.getElementById("requestSuccess");
+const requestReference = document.getElementById("requestReference");
 
-  form?.addEventListener("submit", (event) => {
-    event.preventDefault();
-
-    if (!form.checkValidity()) {
-      form.reportValidity();
-      return;
-    }
-
-    form.classList.add("hidden");
-    success.classList.remove("hidden");
-  });
+function showRequestError(message) {
+  requestError.textContent = message;
+  requestError.classList.remove("hidden");
 }
 
-setupDemoForm("requestForm", "requestSuccess");
+function clearRequestError() {
+  requestError.textContent = "";
+  requestError.classList.add("hidden");
+}
+
+requestForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  clearRequestError();
+
+  if (!requestForm.checkValidity()) {
+    requestForm.reportValidity();
+    return;
+  }
+
+  const originalButtonText = requestSubmit.textContent;
+
+  try {
+    requestSubmit.disabled = true;
+    requestSubmit.textContent = "Đang gửi yêu cầu...";
+
+    const response = await fetch("/api/recruitment-request", {
+      method: "POST",
+      body: new FormData(requestForm),
+      headers: { Accept: "application/json" },
+    });
+
+    let result;
+    try {
+      result = await response.json();
+    } catch {
+      result = {
+        success: false,
+        message: "Máy chủ trả về phản hồi không hợp lệ.",
+      };
+    }
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Không thể gửi yêu cầu tuyển dụng.");
+    }
+
+    requestReference.textContent = result.reference || "Đã tiếp nhận";
+    requestForm.reset();
+    requestForm.classList.add("hidden");
+    requestSuccess.classList.remove("hidden");
+  } catch (error) {
+    showRequestError(
+      error instanceof Error
+        ? error.message
+        : "Không thể gửi yêu cầu. Vui lòng thử lại."
+    );
+  } finally {
+    requestSubmit.disabled = false;
+    requestSubmit.textContent = originalButtonText;
+  }
+});
+
+// Khi mở lại biểu mẫu doanh nghiệp, hiển thị form để có thể gửi yêu cầu mới.
+document.querySelectorAll('[data-open-modal="requestModal"]').forEach((button) => {
+  button.addEventListener("click", () => {
+    clearRequestError();
+    requestForm?.classList.remove("hidden");
+    requestSuccess?.classList.add("hidden");
+  });
+});
 
 const candidateForm = document.getElementById("candidateForm");
 const candidateSubmit = document.getElementById("candidateSubmit");
@@ -188,8 +245,9 @@ function clearCandidateError() {
 }
 
 function validateCvFile(file) {
-  if (!file) {
-    return "Vui lòng chọn file CV.";
+  // CV là tùy chọn. Chỉ kiểm tra định dạng và dung lượng khi người dùng có chọn tệp.
+  if (!file || !file.name || file.size === 0) {
+    return "";
   }
 
   const extension = getFileExtension(file.name);
@@ -236,7 +294,7 @@ candidateForm?.addEventListener("submit", async (event) => {
 
   try {
     candidateSubmit.disabled = true;
-    candidateSubmit.textContent = "Đang tải CV...";
+    candidateSubmit.textContent = "Đang gửi hồ sơ...";
 
     const response = await fetch("/api/upload-cv", {
       method: "POST",
@@ -257,7 +315,7 @@ candidateForm?.addEventListener("submit", async (event) => {
     }
 
     if (!response.ok || !result.success) {
-      throw new Error(result.message || "Không thể gửi CV.");
+      throw new Error(result.message || "Không thể gửi hồ sơ.");
     }
 
     candidateReference.textContent = result.reference || "Đã tiếp nhận";
@@ -268,7 +326,7 @@ candidateForm?.addEventListener("submit", async (event) => {
     showCandidateError(
       error instanceof Error
         ? error.message
-        : "Không thể gửi CV. Vui lòng thử lại."
+        : "Không thể gửi hồ sơ. Vui lòng thử lại."
     );
   } finally {
     candidateSubmit.disabled = false;

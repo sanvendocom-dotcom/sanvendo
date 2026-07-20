@@ -78,6 +78,7 @@ export async function onRequestPost(context) {
     const desiredLocation = cleanText(formData.get("desiredLocation"), 120);
     const consent = cleanText(formData.get("consent"), 20);
     const file = formData.get("cv");
+    const hasCv = isProvidedFile(file);
 
     if (!fullName || !phone || !email) {
       return json(
@@ -109,71 +110,66 @@ export async function onRequestPost(context) {
       );
     }
 
-    if (!(file instanceof File)) {
-      return json(
-        {
-          success: false,
-          message: "Vui lòng chọn file CV.",
-        },
-        400
-      );
-    }
+    let extension = "";
+    let bytes = null;
 
-    if (file.size < MIN_FILE_SIZE) {
-      return json(
-        {
-          success: false,
-          message: "File CV đang trống hoặc không hợp lệ.",
-        },
-        400
-      );
-    }
+    if (hasCv) {
+      if (file.size < MIN_FILE_SIZE) {
+        return json(
+          {
+            success: false,
+            message: "File CV đang trống hoặc không hợp lệ.",
+          },
+          400
+        );
+      }
 
-    if (file.size > MAX_FILE_SIZE) {
-      return json(
-        {
-          success: false,
-          message: "Dung lượng CV tối đa là 10 MB.",
-        },
-        413
-      );
-    }
+      if (file.size > MAX_FILE_SIZE) {
+        return json(
+          {
+            success: false,
+            message: "Dung lượng CV tối đa là 10 MB.",
+          },
+          413
+        );
+      }
 
-    const extension = getExtension(file.name);
-    const rule = TYPE_RULES[extension];
+      extension = getExtension(file.name);
+      const rule = TYPE_RULES[extension];
 
-    if (!rule) {
-      return json(
-        {
-          success: false,
-          message: "Chỉ chấp nhận file PDF, DOC hoặc DOCX.",
-        },
-        400
-      );
-    }
+      if (!rule) {
+        return json(
+          {
+            success: false,
+            message: "Chỉ chấp nhận file PDF, DOC hoặc DOCX.",
+          },
+          400
+        );
+      }
 
-    const mimeType = String(file.type || "").toLowerCase();
-    if (!rule.mimeTypes.has(mimeType)) {
-      return json(
-        {
-          success: false,
-          message: "Định dạng MIME của file không được hỗ trợ.",
-        },
-        400
-      );
-    }
+      const mimeType = String(file.type || "").toLowerCase();
+      if (!rule.mimeTypes.has(mimeType)) {
+        return json(
+          {
+            success: false,
+            message: "Định dạng MIME của file không được hỗ trợ.",
+          },
+          400
+        );
+      }
 
-    const bytes = await file.arrayBuffer();
-    const signatureBytes = new Uint8Array(bytes.slice(0, 16));
+      bytes = await file.arrayBuffer();
+      const signatureBytes = new Uint8Array(bytes.slice(0, 16));
 
-    if (!rule.signature(signatureBytes)) {
-      return json(
-        {
-          success: false,
-          message: "Nội dung file không khớp với định dạng đã chọn.",
-        },
-        400
-      );
+      if (!rule.signature(signatureBytes)) {
+        return json(
+          {
+            success: false,
+            message: "Nội dung file không khớp với định dạng đã chọn.",
+          },
+          400
+        );
+      }
     }
 
     const now = new Date();
@@ -187,32 +183,61 @@ export async function onRequestPost(context) {
       String(now.getUTCDate()).padStart(2, "0"),
     ].join("/");
 
-    const objectKey =
-      `${path}/${uuid}-${safeCandidateName}.${extension}`;
+    const commonMetadata = {
+      reference,
+      hasCv: hasCv ? "true" : "false",
+      recordType: hasCv ? "candidate-cv" : "candidate-no-cv",
+      originalFilename: hasCv ? limitMetadata(file.name, 220) : "",
+      candidateName: limitMetadata(fullName, 100),
+      candidatePhone: limitMetadata(phone, 30),
+      candidateEmail: limitMetadata(email, 160),
+      desiredPosition: limitMetadata(desiredPosition, 120),
+      desiredLocation: limitMetadata(desiredLocation, 120),
+      uploadedAt: now.toISOString(),
+      sourceHost: new URL(request.url).hostname,
+    };
 
-    await env.CV_BUCKET.put(objectKey, bytes, {
-      httpMetadata: {
-        contentType: canonicalContentType(extension),
-        contentDisposition: "attachment",
-      },
-      customMetadata: {
+    if (hasCv) {
+      const objectKey = `${path}/${uuid}-${safeCandidateName}.${extension}`;
+
+      await env.CV_BUCKET.put(objectKey, bytes, {
+        httpMetadata: {
+          contentType: canonicalContentType(extension),
+          contentDisposition: "attachment",
+        },
+        customMetadata: commonMetadata,
+      });
+    } else {
+      // Không có CV vẫn lưu một bản ghi nhỏ trong R2 để trang quản trị nhận được thông tin.
+      const objectKey = `${path}/${uuid}-${safeCandidateName}-no-cv.json`;
+      const record = JSON.stringify({
         reference,
-        originalFilename: limitMetadata(file.name, 220),
-        candidateName: limitMetadata(fullName, 100),
-        candidatePhone: limitMetadata(phone, 30),
-        candidateEmail: limitMetadata(email, 160),
-        desiredPosition: limitMetadata(desiredPosition, 120),
-        desiredLocation: limitMetadata(desiredLocation, 120),
-        uploadedAt: now.toISOString(),
-        sourceHost: new URL(request.url).hostname,
-      },
-    });
+        fullName,
+        phone,
+        email,
+        desiredPosition,
+        desiredLocation,
+        hasCv: false,
+        submittedAt: now.toISOString(),
+      });
+
+      await env.CV_BUCKET.put(objectKey, record, {
+        httpMetadata: {
+          contentType: "application/json; charset=UTF-8",
+          contentDisposition: "inline",
+        },
+        customMetadata: commonMetadata,
+      });
+    }
 
     return json(
       {
         success: true,
-        message: "CV đã được gửi thành công.",
+        message: hasCv
+          ? "Hồ sơ và CV đã được gửi thành công."
+          : "Thông tin ứng viên đã được gửi thành công. Bạn có thể bổ sung CV sau.",
         reference,
+        hasCv,
       },
       201
     );
@@ -222,7 +247,7 @@ export async function onRequestPost(context) {
     return json(
       {
         success: false,
-        message: "Không thể tải CV lên. Vui lòng thử lại sau.",
+        message: "Không thể gửi hồ sơ. Vui lòng thử lại sau.",
       },
       500
     );
@@ -272,6 +297,14 @@ function cleanText(value, maxLength) {
 
 function limitMetadata(value, maxLength) {
   return cleanText(value, maxLength);
+}
+
+function isProvidedFile(value) {
+  return (
+    value instanceof File &&
+    Boolean(String(value.name || "").trim()) &&
+    value.size > 0
+  );
 }
 
 function getExtension(filename) {
@@ -346,10 +379,8 @@ function isZip(bytes) {
   return (
     bytes[0] === 0x50 &&
     bytes[1] === 0x4b &&
-    (
-      (bytes[2] === 0x03 && bytes[3] === 0x04) ||
+    ((bytes[2] === 0x03 && bytes[3] === 0x04) ||
       (bytes[2] === 0x05 && bytes[3] === 0x06) ||
-      (bytes[2] === 0x07 && bytes[3] === 0x08)
-    )
+      (bytes[2] === 0x07 && bytes[3] === 0x08))
   );
 }

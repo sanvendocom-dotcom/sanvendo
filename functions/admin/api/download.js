@@ -24,6 +24,16 @@ export async function onRequestGet(context) {
       return json({ success: false, message: "Không tìm thấy CV." }, 404);
     }
 
+    if (
+      object.customMetadata?.hasCv === "false" ||
+      object.customMetadata?.recordType === "candidate-no-cv"
+    ) {
+      return json(
+        { success: false, message: "Ứng viên này chưa gửi file CV." },
+        404
+      );
+    }
+
     const originalName =
       object.customMetadata?.originalFilename ||
       key.split("/").pop() ||

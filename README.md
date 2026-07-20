@@ -3,8 +3,9 @@
 Phiên bản này bao gồm:
 
 - Website tuyển dụng công khai.
-- Form tải CV PDF/DOC/DOCX tối đa 10 MB.
-- Lưu CV vào bucket R2 riêng tư `sanvendo-private-cv`.
+- Form doanh nghiệp lưu yêu cầu tuyển dụng thật vào R2 và hiển thị trong trang quản trị.
+- Form ứng viên cho phép gửi thông tin không cần CV; CV PDF/DOC/DOCX là tùy chọn, tối đa 10 MB.
+- Lưu CV hoặc bản ghi thông tin ứng viên không có CV vào bucket R2 riêng tư `sanvendo-private-cv`.
 - Trang quản trị tại `https://sanvendo.com/admin`.
 - Danh sách, tìm kiếm và tải CV an toàn.
 - Kiểm tra chữ ký JWT của Cloudflare Access trước khi cho phép truy cập `/admin`.
@@ -30,8 +31,10 @@ functions/
 │   └── api/
 │       ├── candidates.js
 │       ├── download.js
-│       └── me.js
+│       ├── me.js
+│       └── requests.js
 └── api/
+    ├── recruitment-request.js
     └── upload-cv.js
 ```
 
@@ -84,9 +87,10 @@ Giải nén ZIP và tải toàn bộ nội dung bên trong lên repository `sanv
 1. Mở cửa sổ ẩn danh.
 2. Truy cập `https://sanvendo.com/admin`.
 3. Đăng nhập OTP bằng `sanvendo.com@gmail.com`.
-4. Danh sách hồ sơ trong R2 phải hiển thị.
-5. Bấm `Tải CV` để kiểm tra tải xuống.
-6. Truy cập `https://sanvendo.pages.dev/admin` phải bị từ chối.
+4. Gửi thử biểu mẫu doanh nghiệp ở trang chủ; yêu cầu phải xuất hiện trong mục `Yêu cầu tuyển dụng` tại `/admin`.
+5. Danh sách hồ sơ trong R2 phải hiển thị, kể cả hồ sơ chưa gửi CV.
+6. Hồ sơ có CV hiện nút `Tải CV`; hồ sơ không có CV hiện `Chưa gửi CV`.
+7. Truy cập `https://sanvendo.pages.dev/admin` phải bị từ chối.
 
 ## Đăng xuất
 

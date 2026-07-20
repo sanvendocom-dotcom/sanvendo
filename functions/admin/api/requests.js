@@ -21,20 +21,20 @@ export async function onRequestGet(context) {
     const limit = clampLimit(url.searchParams.get("limit"));
 
     const result = query
-      ? await searchCandidates(env.CV_BUCKET, query, limit)
-      : await listCandidates(env.CV_BUCKET, { cursor, limit });
+      ? await searchRequests(env.CV_BUCKET, query, limit)
+      : await listRequests(env.CV_BUCKET, { cursor, limit });
 
     return json({
       success: true,
-      candidates: result.candidates,
+      requests: result.requests,
       cursor: result.cursor || null,
       truncated: Boolean(result.truncated),
       scanned: result.scanned,
     });
   } catch (error) {
-    console.error("List candidates error", error);
+    console.error("List recruitment requests error", error);
     return json(
-      { success: false, message: "Không thể tải danh sách ứng viên." },
+      { success: false, message: "Không thể tải yêu cầu doanh nghiệp." },
       500
     );
   }
@@ -53,25 +53,23 @@ export function onRequest() {
   );
 }
 
-async function listCandidates(bucket, options) {
+async function listRequests(bucket, options) {
   const list = await bucket.list({
-    prefix: "cv/",
+    prefix: "requests/",
     cursor: options.cursor || undefined,
     limit: options.limit,
-    include: ["customMetadata", "httpMetadata"],
+    include: ["customMetadata"],
   });
 
   return {
-    candidates: list.objects
-      .map(toCandidate)
-      .sort(sortNewestFirst),
+    requests: list.objects.map(toRequest).sort(sortNewestFirst),
     cursor: list.truncated ? list.cursor : null,
     truncated: list.truncated,
     scanned: list.objects.length,
   };
 }
 
-async function searchCandidates(bucket, query, limit) {
+async function searchRequests(bucket, query, limit) {
   const normalizedQuery = normalize(query);
   const matches = [];
   let cursor;
@@ -80,19 +78,17 @@ async function searchCandidates(bucket, query, limit) {
 
   do {
     const list = await bucket.list({
-      prefix: "cv/",
+      prefix: "requests/",
       cursor,
       limit: 100,
-      include: ["customMetadata", "httpMetadata"],
+      include: ["customMetadata"],
     });
 
     scanned += list.objects.length;
 
     for (const object of list.objects) {
-      const candidate = toCandidate(object);
-      if (candidateMatches(candidate, normalizedQuery)) {
-        matches.push(candidate);
-      }
+      const request = toRequest(object);
+      if (requestMatches(request, normalizedQuery)) matches.push(request);
     }
 
     cursor = list.truncated ? list.cursor : undefined;
@@ -102,63 +98,62 @@ async function searchCandidates(bucket, query, limit) {
   matches.sort(sortNewestFirst);
 
   return {
-    candidates: matches.slice(0, limit),
+    requests: matches.slice(0, limit),
     cursor: null,
     truncated: truncated && scanned >= MAX_SEARCH_OBJECTS,
     scanned,
   };
 }
 
-function toCandidate(object) {
+function toRequest(object) {
   const metadata = object.customMetadata || {};
-  const uploadedAt =
-    metadata.uploadedAt ||
+  const submittedAt =
+    metadata.submittedAt ||
     (object.uploaded instanceof Date
       ? object.uploaded.toISOString()
       : String(object.uploaded || ""));
 
-  const hasCv = metadata.hasCv !== "false" && metadata.recordType !== "candidate-no-cv";
-
   return {
     key: object.key,
     reference: metadata.reference || "",
-    name: metadata.candidateName || "Chưa có tên",
-    email: metadata.candidateEmail || "",
-    phone: metadata.candidatePhone || "",
-    desiredPosition: metadata.desiredPosition || "",
-    desiredLocation: metadata.desiredLocation || "",
-    hasCv,
-    originalFilename: hasCv
-      ? metadata.originalFilename || filenameFromKey(object.key)
-      : "",
-    uploadedAt,
-    size: hasCv ? Number(object.size || 0) : 0,
-    contentType: hasCv
-      ? object.httpMetadata?.contentType || "application/octet-stream"
-      : "",
+    company: metadata.company || "Chưa có tên doanh nghiệp",
+    contact: metadata.contact || "",
+    phone: metadata.phone || "",
+    email: metadata.email || "",
+    position: metadata.position || "",
+    quantity: Number.parseInt(metadata.quantity || "1", 10) || 1,
+    location: metadata.location || "",
+    salary: metadata.salary || "",
+    deadline: metadata.deadline || "",
+    description: metadata.description || "",
+    submittedAt,
   };
 }
 
-function candidateMatches(candidate, query) {
+function requestMatches(request, query) {
   return [
-    candidate.reference,
-    candidate.name,
-    candidate.email,
-    candidate.phone,
-    candidate.desiredPosition,
-    candidate.desiredLocation,
-    candidate.originalFilename,
+    request.reference,
+    request.company,
+    request.contact,
+    request.phone,
+    request.email,
+    request.position,
+    request.location,
+    request.salary,
+    request.deadline,
+    request.description,
   ].some((value) => normalize(value).includes(query));
 }
 
 function sortNewestFirst(a, b) {
-  return Date.parse(b.uploadedAt || 0) - Date.parse(a.uploadedAt || 0);
+  return Date.parse(b.submittedAt || 0) - Date.parse(a.submittedAt || 0);
 }
 
 function normalize(value) {
   return String(value || "")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
     .toLowerCase()
     .trim();
 }
@@ -176,10 +171,6 @@ function clampLimit(value) {
   const parsed = Number.parseInt(value || "", 10);
   if (!Number.isFinite(parsed)) return DEFAULT_LIMIT;
   return Math.min(Math.max(parsed, 10), MAX_LIMIT);
-}
-
-function filenameFromKey(key) {
-  return String(key || "").split("/").pop() || "cv";
 }
 
 function json(data, status = 200) {

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow,noarchive">
   <meta name="referrer" content="no-referrer">
-  <title>Quản trị hồ sơ — Sanvendo</title>
+  <title>Quản trị tuyển dụng — Sanvendo</title>
   <link rel="stylesheet" href="/admin/admin.css">
   <script src="/admin/admin.js" defer></script>
 </head>
@@ -28,25 +28,29 @@
   <main class="page-shell">
     <section class="page-heading">
       <div>
-        <p class="eyebrow">R2 PRIVATE CV</p>
-        <h1>Hồ sơ ứng viên</h1>
+        <p class="eyebrow">SANVENDO ADMIN</p>
+        <h1>Thông tin đã tiếp nhận</h1>
         <p class="heading-copy">
-          Xem thông tin ứng viên và tải CV từ kho R2 riêng tư.
+          Xem yêu cầu tuyển dụng của doanh nghiệp và hồ sơ ứng viên trong kho R2 riêng tư.
         </p>
       </div>
 
       <button class="button button-secondary" id="refreshButton" type="button">
-        Làm mới
+        Làm mới tất cả
       </button>
     </section>
 
-    <section class="stats-grid" aria-label="Thống kê hồ sơ">
+    <section class="stats-grid" aria-label="Thống kê dữ liệu">
       <article class="stat-card">
-        <span>Đang hiển thị</span>
-        <strong id="visibleCount">0</strong>
+        <span>Yêu cầu doanh nghiệp</span>
+        <strong id="requestCount">0</strong>
       </article>
       <article class="stat-card">
-        <span>Dung lượng</span>
+        <span>Hồ sơ ứng viên</span>
+        <strong id="candidateCount">0</strong>
+      </article>
+      <article class="stat-card">
+        <span>Dung lượng CV đang hiển thị</span>
         <strong id="visibleSize">0 B</strong>
       </article>
       <article class="stat-card">
@@ -55,24 +59,92 @@
       </article>
     </section>
 
-    <section class="panel">
-      <form class="toolbar" id="searchForm" role="search">
+    <section class="panel" aria-labelledby="requestsHeading">
+      <div class="panel-heading">
+        <div>
+          <p class="panel-kicker">DÀNH CHO DOANH NGHIỆP</p>
+          <h2 id="requestsHeading">Yêu cầu tuyển dụng</h2>
+          <p>Tin gửi từ biểu mẫu “Gửi yêu cầu tuyển dụng” trên trang chủ.</p>
+        </div>
+      </div>
+
+      <form class="toolbar" id="requestSearchForm" role="search">
+        <label class="search-field">
+          <span class="sr-only">Tìm kiếm yêu cầu tuyển dụng</span>
+          <input
+            id="requestSearchInput"
+            type="search"
+            autocomplete="off"
+            maxlength="160"
+            placeholder="Tìm doanh nghiệp, người liên hệ, vị trí, điện thoại hoặc email"
+          >
+        </label>
+        <button class="button button-primary" type="submit">Tìm kiếm</button>
+        <button class="button button-ghost" id="requestClearSearchButton" type="button">Xóa lọc</button>
+      </form>
+
+      <div class="status-message hidden" id="requestStatusMessage" role="status"></div>
+
+      <div class="table-wrap">
+        <table class="request-table">
+          <thead>
+            <tr>
+              <th>Doanh nghiệp</th>
+              <th>Người liên hệ</th>
+              <th>Nhu cầu tuyển</th>
+              <th>Điều kiện</th>
+              <th>Ngày gửi</th>
+              <th>Mô tả</th>
+            </tr>
+          </thead>
+          <tbody id="requestRows"></tbody>
+        </table>
+      </div>
+
+      <div class="empty-state hidden" id="requestEmptyState">
+        <div class="empty-icon">DN</div>
+        <h2>Chưa có yêu cầu doanh nghiệp</h2>
+        <p>Yêu cầu mới sẽ xuất hiện tại đây ngay sau khi biểu mẫu được gửi thành công.</p>
+      </div>
+
+      <div class="loading-state" id="requestLoadingState" aria-live="polite">
+        <span class="spinner" aria-hidden="true"></span>
+        <span>Đang tải yêu cầu doanh nghiệp…</span>
+      </div>
+
+      <footer class="pagination hidden" id="requestPagination">
+        <span id="requestScanSummary"></span>
+        <button class="button button-secondary" id="requestLoadMoreButton" type="button">
+          Tải thêm
+        </button>
+      </footer>
+    </section>
+
+    <section class="panel" aria-labelledby="candidatesHeading">
+      <div class="panel-heading">
+        <div>
+          <p class="panel-kicker">DÀNH CHO ỨNG VIÊN</p>
+          <h2 id="candidatesHeading">Hồ sơ ứng viên</h2>
+          <p>Xem thông tin ứng viên và tải CV từ kho R2 riêng tư.</p>
+        </div>
+      </div>
+
+      <form class="toolbar" id="candidateSearchForm" role="search">
         <label class="search-field">
           <span class="sr-only">Tìm kiếm ứng viên</span>
           <input
-            id="searchInput"
+            id="candidateSearchInput"
             type="search"
-            name="q"
             autocomplete="off"
             maxlength="160"
             placeholder="Tìm theo tên, email, điện thoại, vị trí hoặc mã hồ sơ"
           >
         </label>
         <button class="button button-primary" type="submit">Tìm kiếm</button>
-        <button class="button button-ghost" id="clearSearchButton" type="button">Xóa lọc</button>
+        <button class="button button-ghost" id="candidateClearSearchButton" type="button">Xóa lọc</button>
       </form>
 
-      <div class="status-message hidden" id="statusMessage" role="status"></div>
+      <div class="status-message hidden" id="candidateStatusMessage" role="status"></div>
 
       <div class="table-wrap">
         <table>
@@ -89,20 +161,20 @@
         </table>
       </div>
 
-      <div class="empty-state hidden" id="emptyState">
+      <div class="empty-state hidden" id="candidateEmptyState">
         <div class="empty-icon">CV</div>
         <h2>Chưa tìm thấy hồ sơ</h2>
-        <p>Hồ sơ mới sẽ xuất hiện tại đây sau khi ứng viên gửi CV.</p>
+        <p>Hồ sơ mới sẽ xuất hiện tại đây sau khi ứng viên gửi thông tin.</p>
       </div>
 
-      <div class="loading-state" id="loadingState" aria-live="polite">
+      <div class="loading-state" id="candidateLoadingState" aria-live="polite">
         <span class="spinner" aria-hidden="true"></span>
         <span>Đang tải hồ sơ…</span>
       </div>
 
-      <footer class="pagination hidden" id="pagination">
-        <span id="scanSummary"></span>
-        <button class="button button-secondary" id="loadMoreButton" type="button">
+      <footer class="pagination hidden" id="candidatePagination">
+        <span id="candidateScanSummary"></span>
+        <button class="button button-secondary" id="candidateLoadMoreButton" type="button">
           Tải thêm
         </button>
       </footer>

@@ -1,57 +1,101 @@
 const state = {
-  candidates: [],
-  cursor: null,
-  query: "",
-  loading: false,
-  scanned: 0,
-  searchTruncated: false,
+  candidates: createListState(),
+  requests: createListState(),
 };
 
 const elements = {
   adminEmail: document.getElementById("adminEmail"),
   logoutLink: document.getElementById("logoutLink"),
-  visibleCount: document.getElementById("visibleCount"),
+  refreshButton: document.getElementById("refreshButton"),
+  requestCount: document.getElementById("requestCount"),
+  candidateCount: document.getElementById("candidateCount"),
   visibleSize: document.getElementById("visibleSize"),
   lastUpdated: document.getElementById("lastUpdated"),
-  refreshButton: document.getElementById("refreshButton"),
-  searchForm: document.getElementById("searchForm"),
-  searchInput: document.getElementById("searchInput"),
-  clearSearchButton: document.getElementById("clearSearchButton"),
-  statusMessage: document.getElementById("statusMessage"),
-  candidateRows: document.getElementById("candidateRows"),
-  emptyState: document.getElementById("emptyState"),
-  loadingState: document.getElementById("loadingState"),
-  pagination: document.getElementById("pagination"),
-  scanSummary: document.getElementById("scanSummary"),
-  loadMoreButton: document.getElementById("loadMoreButton"),
+
+  requests: {
+    searchForm: document.getElementById("requestSearchForm"),
+    searchInput: document.getElementById("requestSearchInput"),
+    clearSearchButton: document.getElementById("requestClearSearchButton"),
+    statusMessage: document.getElementById("requestStatusMessage"),
+    rows: document.getElementById("requestRows"),
+    emptyState: document.getElementById("requestEmptyState"),
+    loadingState: document.getElementById("requestLoadingState"),
+    pagination: document.getElementById("requestPagination"),
+    scanSummary: document.getElementById("requestScanSummary"),
+    loadMoreButton: document.getElementById("requestLoadMoreButton"),
+  },
+
+  candidates: {
+    searchForm: document.getElementById("candidateSearchForm"),
+    searchInput: document.getElementById("candidateSearchInput"),
+    clearSearchButton: document.getElementById("candidateClearSearchButton"),
+    statusMessage: document.getElementById("candidateStatusMessage"),
+    rows: document.getElementById("candidateRows"),
+    emptyState: document.getElementById("candidateEmptyState"),
+    loadingState: document.getElementById("candidateLoadingState"),
+    pagination: document.getElementById("candidatePagination"),
+    scanSummary: document.getElementById("candidateScanSummary"),
+    loadMoreButton: document.getElementById("candidateLoadMoreButton"),
+  },
 };
 
 initialize();
 
+function createListState() {
+  return {
+    items: [],
+    cursor: null,
+    query: "",
+    loading: false,
+    scanned: 0,
+    searchTruncated: false,
+  };
+}
+
 async function initialize() {
   bindEvents();
-  await Promise.all([loadIdentity(), loadCandidates({ reset: true })]);
+  await Promise.all([
+    loadIdentity(),
+    loadRequests({ reset: true }),
+    loadCandidates({ reset: true }),
+  ]);
 }
 
 function bindEvents() {
-  elements.refreshButton.addEventListener("click", () => {
-    loadCandidates({ reset: true });
+  elements.refreshButton.addEventListener("click", async () => {
+    elements.refreshButton.disabled = true;
+    try {
+      await Promise.all([
+        loadRequests({ reset: true }),
+        loadCandidates({ reset: true }),
+      ]);
+    } finally {
+      elements.refreshButton.disabled = false;
+    }
   });
 
-  elements.searchForm.addEventListener("submit", (event) => {
+  bindListEvents("requests", loadRequests);
+  bindListEvents("candidates", loadCandidates);
+}
+
+function bindListEvents(type, loader) {
+  const group = elements[type];
+  const listState = state[type];
+
+  group.searchForm.addEventListener("submit", (event) => {
     event.preventDefault();
-    state.query = elements.searchInput.value.trim();
-    loadCandidates({ reset: true });
+    listState.query = group.searchInput.value.trim();
+    loader({ reset: true });
   });
 
-  elements.clearSearchButton.addEventListener("click", () => {
-    elements.searchInput.value = "";
-    state.query = "";
-    loadCandidates({ reset: true });
+  group.clearSearchButton.addEventListener("click", () => {
+    group.searchInput.value = "";
+    listState.query = "";
+    loader({ reset: true });
   });
 
-  elements.loadMoreButton.addEventListener("click", () => {
-    loadCandidates({ reset: false });
+  group.loadMoreButton.addEventListener("click", () => {
+    loader({ reset: false });
   });
 }
 
@@ -71,28 +115,64 @@ async function loadIdentity() {
     elements.logoutLink.href = result.logoutUrl || "/cdn-cgi/access/logout";
   } catch (error) {
     elements.adminEmail.textContent = "Không xác định";
-    showError(error.message);
+    showError(elements.requests, error.message);
+  }
+}
+
+async function loadRequests({ reset }) {
+  const listState = state.requests;
+  const group = elements.requests;
+  if (listState.loading) return;
+
+  listState.loading = true;
+  setLoading(group, true);
+  hideError(group);
+
+  if (reset) resetListState(listState, renderRequests);
+
+  const params = buildParams(listState, reset);
+
+  try {
+    const response = await fetch(`/admin/api/requests?${params.toString()}`, {
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+    });
+    const result = await parseJson(response);
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Không thể tải yêu cầu doanh nghiệp.");
+    }
+
+    const incoming = Array.isArray(result.requests) ? result.requests : [];
+    listState.items = reset
+      ? incoming
+      : mergeUnique(listState.items, incoming, "submittedAt");
+    listState.cursor = result.cursor || null;
+    listState.scanned = Number(result.scanned || incoming.length);
+    listState.searchTruncated = Boolean(result.truncated && listState.query);
+
+    renderRequests();
+  } catch (error) {
+    showError(group, error.message);
+  } finally {
+    listState.loading = false;
+    setLoading(group, false);
+    renderRequests();
   }
 }
 
 async function loadCandidates({ reset }) {
-  if (state.loading) return;
+  const listState = state.candidates;
+  const group = elements.candidates;
+  if (listState.loading) return;
 
-  state.loading = true;
-  setLoading(true);
-  hideError();
+  listState.loading = true;
+  setLoading(group, true);
+  hideError(group);
 
-  if (reset) {
-    state.candidates = [];
-    state.cursor = null;
-    state.scanned = 0;
-    state.searchTruncated = false;
-    renderCandidates();
-  }
+  if (reset) resetListState(listState, renderCandidates);
 
-  const params = new URLSearchParams({ limit: "40" });
-  if (state.query) params.set("q", state.query);
-  if (!reset && state.cursor && !state.query) params.set("cursor", state.cursor);
+  const params = buildParams(listState, reset);
 
   try {
     const response = await fetch(`/admin/api/candidates?${params.toString()}`, {
@@ -106,42 +186,97 @@ async function loadCandidates({ reset }) {
     }
 
     const incoming = Array.isArray(result.candidates) ? result.candidates : [];
-    state.candidates = reset
+    listState.items = reset
       ? incoming
-      : mergeUniqueCandidates(state.candidates, incoming);
-    state.cursor = result.cursor || null;
-    state.scanned = Number(result.scanned || incoming.length);
-    state.searchTruncated = Boolean(result.truncated && state.query);
+      : mergeUnique(listState.items, incoming, "uploadedAt");
+    listState.cursor = result.cursor || null;
+    listState.scanned = Number(result.scanned || incoming.length);
+    listState.searchTruncated = Boolean(result.truncated && listState.query);
 
     renderCandidates();
   } catch (error) {
-    showError(error.message);
+    showError(group, error.message);
   } finally {
-    state.loading = false;
-    setLoading(false);
+    listState.loading = false;
+    setLoading(group, false);
+    renderCandidates();
   }
 }
 
-function renderCandidates() {
-  elements.candidateRows.replaceChildren();
+function resetListState(listState, render) {
+  listState.items = [];
+  listState.cursor = null;
+  listState.scanned = 0;
+  listState.searchTruncated = false;
+  render();
+}
 
-  for (const candidate of state.candidates) {
-    elements.candidateRows.append(createCandidateRow(candidate));
+function buildParams(listState, reset) {
+  const params = new URLSearchParams({ limit: "40" });
+  if (listState.query) params.set("q", listState.query);
+  if (!reset && listState.cursor && !listState.query) {
+    params.set("cursor", listState.cursor);
+  }
+  return params;
+}
+
+function renderRequests() {
+  const listState = state.requests;
+  const group = elements.requests;
+  group.rows.replaceChildren();
+
+  for (const request of listState.items) {
+    group.rows.append(createRequestRow(request));
   }
 
-  const isEmpty = !state.loading && state.candidates.length === 0;
-  elements.emptyState.classList.toggle("hidden", !isEmpty);
-  elements.pagination.classList.toggle(
-    "hidden",
-    state.candidates.length === 0 || (!state.cursor && !state.query)
+  updateListFooter(group, listState, "yêu cầu");
+  updateStats();
+}
+
+function createRequestRow(request) {
+  const row = document.createElement("tr");
+
+  row.append(
+    createCell([
+      textElement("p", request.company || "Chưa có tên doanh nghiệp", "candidate-name"),
+      textElement("span", request.reference || "Không có mã yêu cầu", "reference"),
+    ]),
+    createCell([
+      textElement("span", request.contact || "Chưa có người liên hệ", "candidate-name"),
+      linkElement(`mailto:${request.email}`, request.email || "Chưa có email", "contact-link"),
+      linkElement(`tel:${request.phone}`, request.phone || "Chưa có điện thoại", "contact-link"),
+    ]),
+    createCell([
+      textElement("span", request.position || "Chưa cung cấp", "candidate-name"),
+      badgeElement(`${Number(request.quantity || 1)} người`),
+    ]),
+    createCell([
+      labeledText("Địa điểm", request.location || "Chưa cung cấp"),
+      labeledText("Mức lương", request.salary || "Chưa cung cấp"),
+    ]),
+    createCell([
+      textElement("span", formatDate(request.submittedAt), "candidate-name"),
+      textElement("span", formatRelativeTime(request.submittedAt), "secondary-text"),
+      labeledText("Cần nhân sự", request.deadline || "Chưa cung cấp"),
+    ]),
+    createCell([
+      descriptionElement(request.description || "Không có mô tả thêm"),
+    ])
   );
-  elements.loadMoreButton.classList.toggle("hidden", !state.cursor || Boolean(state.query));
 
-  const summaryParts = [`${state.candidates.length} hồ sơ`];
-  if (state.query) summaryParts.push(`đã quét ${state.scanned} tệp`);
-  if (state.searchTruncated) summaryParts.push("kết quả tìm kiếm đã được giới hạn");
-  elements.scanSummary.textContent = summaryParts.join(" · ");
+  return row;
+}
 
+function renderCandidates() {
+  const listState = state.candidates;
+  const group = elements.candidates;
+  group.rows.replaceChildren();
+
+  for (const candidate of listState.items) {
+    group.rows.append(createCandidateRow(candidate));
+  }
+
+  updateListFooter(group, listState, "hồ sơ");
   updateStats();
 }
 
@@ -165,14 +300,39 @@ function createCandidateRow(candidate) {
       textElement("span", formatDate(candidate.uploadedAt), "candidate-name"),
       textElement("span", formatRelativeTime(candidate.uploadedAt), "secondary-text"),
     ]),
-    createCell([
-      textElement("span", candidate.originalFilename || "CV", "file-name"),
-      textElement("span", formatBytes(candidate.size), "secondary-text"),
-      downloadElement(candidate),
-    ])
+    createCell(
+      candidate.hasCv
+        ? [
+            textElement("span", candidate.originalFilename || "CV", "file-name"),
+            textElement("span", formatBytes(candidate.size), "secondary-text"),
+            downloadElement(candidate),
+          ]
+        : [
+            textElement("span", "Chưa gửi CV", "file-name no-cv"),
+            textElement("span", "Đã nhận thông tin liên hệ", "secondary-text"),
+          ]
+    )
   );
 
   return row;
+}
+
+function updateListFooter(group, listState, noun) {
+  const isEmpty = !listState.loading && listState.items.length === 0;
+  group.emptyState.classList.toggle("hidden", !isEmpty);
+  group.pagination.classList.toggle(
+    "hidden",
+    listState.items.length === 0 || (!listState.cursor && !listState.query)
+  );
+  group.loadMoreButton.classList.toggle(
+    "hidden",
+    !listState.cursor || Boolean(listState.query)
+  );
+
+  const summaryParts = [`${listState.items.length} ${noun}`];
+  if (listState.query) summaryParts.push(`đã quét ${listState.scanned} bản ghi`);
+  if (listState.searchTruncated) summaryParts.push("kết quả tìm kiếm đã được giới hạn");
+  group.scanSummary.textContent = summaryParts.join(" · ");
 }
 
 function createCell(children) {
@@ -204,6 +364,35 @@ function linkElement(href, text, className) {
   return element;
 }
 
+function labeledText(label, value) {
+  const wrapper = document.createElement("span");
+  wrapper.className = "labeled-text";
+
+  const labelElement = document.createElement("small");
+  labelElement.textContent = label;
+
+  const valueElement = document.createElement("span");
+  valueElement.textContent = value;
+
+  wrapper.append(labelElement, valueElement);
+  return wrapper;
+}
+
+function badgeElement(text) {
+  const badge = document.createElement("span");
+  badge.className = "badge";
+  badge.textContent = text;
+  return badge;
+}
+
+function descriptionElement(text) {
+  const element = document.createElement("p");
+  element.className = "description-text";
+  element.textContent = text;
+  element.title = text;
+  return element;
+}
+
 function downloadElement(candidate) {
   const link = document.createElement("a");
   link.className = "download-link";
@@ -213,17 +402,22 @@ function downloadElement(candidate) {
 }
 
 function updateStats() {
-  const totalSize = state.candidates.reduce(
+  elements.requestCount.textContent = String(state.requests.items.length);
+  elements.candidateCount.textContent = String(state.candidates.items.length);
+
+  const totalSize = state.candidates.items.reduce(
     (sum, candidate) => sum + Number(candidate.size || 0),
     0
   );
-  const newest = state.candidates
-    .map((candidate) => Date.parse(candidate.uploadedAt || 0))
+  elements.visibleSize.textContent = formatBytes(totalSize);
+
+  const newest = [
+    ...state.requests.items.map((item) => Date.parse(item.submittedAt || 0)),
+    ...state.candidates.items.map((item) => Date.parse(item.uploadedAt || 0)),
+  ]
     .filter(Number.isFinite)
     .sort((a, b) => b - a)[0];
 
-  elements.visibleCount.textContent = String(state.candidates.length);
-  elements.visibleSize.textContent = formatBytes(totalSize);
   elements.lastUpdated.textContent = newest
     ? new Intl.DateTimeFormat("vi-VN", {
         dateStyle: "medium",
@@ -232,27 +426,28 @@ function updateStats() {
     : "—";
 }
 
-function setLoading(isLoading) {
-  elements.loadingState.classList.toggle("hidden", !isLoading);
-  elements.refreshButton.disabled = isLoading;
-  elements.loadMoreButton.disabled = isLoading;
+function setLoading(group, isLoading) {
+  group.loadingState.classList.toggle("hidden", !isLoading);
+  group.loadMoreButton.disabled = isLoading;
+  group.searchInput.disabled = isLoading;
+  group.clearSearchButton.disabled = isLoading;
 }
 
-function showError(message) {
-  elements.statusMessage.textContent = message || "Đã xảy ra lỗi.";
-  elements.statusMessage.classList.remove("hidden");
+function showError(group, message) {
+  group.statusMessage.textContent = message || "Đã xảy ra lỗi.";
+  group.statusMessage.classList.remove("hidden");
 }
 
-function hideError() {
-  elements.statusMessage.textContent = "";
-  elements.statusMessage.classList.add("hidden");
+function hideError(group) {
+  group.statusMessage.textContent = "";
+  group.statusMessage.classList.add("hidden");
 }
 
-function mergeUniqueCandidates(current, incoming) {
-  const map = new Map(current.map((candidate) => [candidate.key, candidate]));
-  for (const candidate of incoming) map.set(candidate.key, candidate);
+function mergeUnique(current, incoming, dateField) {
+  const map = new Map(current.map((item) => [item.key, item]));
+  for (const item of incoming) map.set(item.key, item);
   return [...map.values()].sort(
-    (a, b) => Date.parse(b.uploadedAt || 0) - Date.parse(a.uploadedAt || 0)
+    (a, b) => Date.parse(b[dateField] || 0) - Date.parse(a[dateField] || 0)
   );
 }
 

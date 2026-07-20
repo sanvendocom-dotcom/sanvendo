@@ -567,62 +567,74 @@
       <h2 id="requestModalTitle">Gửi yêu cầu tuyển dụng</h2>
       <p>Điền thông tin cơ bản. Sanvendo sẽ liên hệ để xác nhận nhu cầu và báo giá.</p>
 
-      <form class="modal-form" id="requestForm">
+      <form class="modal-form" id="requestForm" method="post" novalidate>
         <div class="form-grid">
           <label>
             <span>Tên doanh nghiệp *</span>
-            <input type="text" name="company" required />
+            <input type="text" name="company" autocomplete="organization" maxlength="160" required />
           </label>
           <label>
             <span>Người liên hệ *</span>
-            <input type="text" name="contact" required />
+            <input type="text" name="contact" autocomplete="name" maxlength="100" required />
           </label>
           <label>
             <span>Số điện thoại *</span>
-            <input type="tel" name="phone" required />
+            <input type="tel" name="phone" autocomplete="tel" maxlength="30" required />
           </label>
           <label>
             <span>Email công việc *</span>
-            <input type="email" name="email" required />
+            <input type="email" name="email" autocomplete="email" maxlength="160" required />
           </label>
           <label class="full">
             <span>Vị trí cần tuyển *</span>
-            <input type="text" name="position" required />
+            <input type="text" name="position" maxlength="160" required />
           </label>
           <label>
             <span>Số lượng</span>
-            <input type="number" name="quantity" min="1" value="1" />
+            <input type="number" name="quantity" min="1" max="9999" value="1" />
           </label>
           <label>
             <span>Địa điểm làm việc</span>
-            <input type="text" name="location" />
+            <input type="text" name="location" maxlength="160" />
           </label>
           <label>
             <span>Mức lương dự kiến</span>
-            <input type="text" name="salary" />
+            <input type="text" name="salary" maxlength="120" />
           </label>
           <label>
             <span>Thời gian cần nhân sự</span>
-            <input type="text" name="deadline" placeholder="Ví dụ: trong 30 ngày" />
+            <input type="text" name="deadline" maxlength="120" placeholder="Ví dụ: trong 30 ngày" />
           </label>
           <label class="full">
             <span>Mô tả yêu cầu</span>
-            <textarea name="description" rows="4"></textarea>
+            <textarea name="description" rows="4" maxlength="1500"></textarea>
+          </label>
+
+          <label class="hp-field" aria-hidden="true">
+            <span>Website</span>
+            <input type="text" name="website" tabindex="-1" autocomplete="off" />
           </label>
         </div>
 
         <label class="consent">
-          <input type="checkbox" required />
+          <input type="checkbox" name="consent" value="yes" required />
           <span>Tôi đồng ý để Sanvendo liên hệ tư vấn về yêu cầu tuyển dụng này.</span>
         </label>
 
-        <button class="btn btn-primary btn-block" type="submit">Gửi yêu cầu</button>
+        <p class="form-error hidden" id="requestError" role="alert"></p>
+
+        <button class="btn btn-primary btn-block" id="requestSubmit" type="submit">
+          Gửi yêu cầu
+        </button>
       </form>
 
       <div class="success-message hidden" id="requestSuccess">
         <div class="success-icon">✓</div>
-        <h3>Đã ghi nhận yêu cầu</h3>
-        <p>Đây là bản demo giao diện. Bạn có thể kết nối form với email, Google Sheets hoặc CRM sau.</p>
+        <h3>Đã nhận yêu cầu tuyển dụng</h3>
+        <p>
+          Mã yêu cầu: <strong id="requestReference"></strong>.
+          Sanvendo sẽ liên hệ để xác nhận nhu cầu và báo giá.
+        </p>
       </div>
     </div>
   </div>
@@ -695,17 +707,16 @@
           </label>
 
           <label class="full">
-            <span>File CV *</span>
+            <span>File CV (không bắt buộc)</span>
             <input
               class="file-input"
               id="cvFile"
               type="file"
               name="cv"
               accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-              required
             />
             <small class="field-help">
-              Chấp nhận PDF, DOC hoặc DOCX. Dung lượng tối đa 10 MB.
+              Có thể gửi hồ sơ trước và bổ sung CV sau. Nếu tải lên: PDF, DOC hoặc DOCX, tối đa 10 MB.
             </small>
           </label>
 
@@ -736,7 +747,7 @@
 
       <div class="success-message hidden" id="candidateSuccess">
         <div class="success-icon">✓</div>
-        <h3>CV đã được gửi thành công</h3>
+        <h3>Hồ sơ đã được gửi thành công</h3>
         <p>
           Mã hồ sơ: <strong id="candidateReference"></strong>.
           Sanvendo sẽ liên hệ khi có cơ hội phù hợp.
