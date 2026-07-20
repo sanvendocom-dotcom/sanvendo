@@ -1,0 +1,27 @@
+# Không để tên miền thử nghiệm của Cloudflare cạnh tranh với tên miền chính.
+https://sanvendo.pages.dev/*
+  X-Robots-Tag: noindex, nofollow, noarchive
+
+https://:version.sanvendo.pages.dev/*
+  X-Robots-Tag: noindex, nofollow, noarchive
+
+/admin/*
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Cache-Control: no-store
+
+/robots.txt
+  Cache-Control: public, max-age=3600
+
+/style.css
+  Cache-Control: public, max-age=604800
+
+/script.js
+  Cache-Control: public, max-age=604800
+
+/job.css
+  Cache-Control: public, max-age=604800
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()

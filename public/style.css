@@ -835,11 +835,22 @@ img {
   font-size: 14px;
 }
 
-.job-footer button {
+.job-footer button,
+.job-footer a {
   color: var(--brand-dark);
   background: transparent;
   border: 0;
   font-weight: 900;
+  text-decoration: none;
+}
+
+.job-title-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.job-title-link:hover {
+  color: var(--brand-dark);
 }
 
 .empty-state {
@@ -1679,4 +1690,10 @@ img {
   .job-footer {
     align-items: flex-start;
   }
+}
+
+.job-footer .job-detail-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }

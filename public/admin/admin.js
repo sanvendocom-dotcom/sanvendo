@@ -19,8 +19,11 @@ const elements = {
     form: document.getElementById("jobForm"),
     id: document.getElementById("jobId"),
     title: document.getElementById("jobTitle"),
+    companyName: document.getElementById("jobCompanyName"),
     category: document.getElementById("jobCategory"),
     location: document.getElementById("jobLocation"),
+    employmentType: document.getElementById("jobEmploymentType"),
+    validThrough: document.getElementById("jobValidThrough"),
     experience: document.getElementById("jobExperience"),
     workHours: document.getElementById("jobWorkHours"),
     summary: document.getElementById("jobSummary"),
@@ -193,8 +196,11 @@ async function submitJobForm(event) {
   const payload = {
     id,
     title: elements.jobs.title.value.trim(),
+    companyName: elements.jobs.companyName.value.trim(),
     category: elements.jobs.category.value,
     location: elements.jobs.location.value.trim(),
+    employmentType: elements.jobs.employmentType.value,
+    validThrough: elements.jobs.validThrough.value,
     experience: elements.jobs.experience.value.trim(),
     workHours: elements.jobs.workHours.value.trim(),
     summary: elements.jobs.summary.value.trim(),
@@ -285,8 +291,11 @@ async function handleJobTableClick(event) {
 function startEditingJob(job) {
   elements.jobs.id.value = job.id || "";
   elements.jobs.title.value = job.title || "";
+  elements.jobs.companyName.value = job.companyName || "";
   elements.jobs.category.value = job.category || "";
   elements.jobs.location.value = job.location || "";
+  elements.jobs.employmentType.value = job.employmentType || "";
+  elements.jobs.validThrough.value = job.validThrough || "";
   elements.jobs.experience.value = job.experience || "";
   elements.jobs.workHours.value = job.workHours || "";
   elements.jobs.summary.value = job.summary || "";
@@ -332,6 +341,7 @@ function createJobRow(job) {
   row.append(
     createCell([
       textElement("p", job.title || "Chưa có tên vị trí", "candidate-name"),
+      textElement("span", job.companyName || "Chưa ghi doanh nghiệp tuyển dụng", "secondary-text"),
       textElement("span", job.logo || "Không có ký hiệu", "reference"),
       textElement("span", `Cập nhật: ${formatDate(job.updatedAt)}`, "secondary-text"),
       textElement("span", job.summary || "Chưa có nội dung giới thiệu chi tiết", "job-summary-preview"),

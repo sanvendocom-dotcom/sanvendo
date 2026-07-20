@@ -63,6 +63,7 @@ function openModal(modalId, trigger) {
 document.addEventListener("click", (event) => {
   const detailButton = event.target.closest("[data-job-details]");
   if (detailButton) {
+    if (detailButton instanceof HTMLAnchorElement) event.preventDefault();
     openJobDetails(detailButton.dataset.jobDetails);
     return;
   }
@@ -203,7 +204,11 @@ function createJobCard(job) {
   category.textContent = job.category || "Khác";
 
   const title = document.createElement("h3");
-  title.textContent = job.title || "Vị trí tuyển dụng";
+  const titleLink = document.createElement("a");
+  titleLink.className = "job-title-link";
+  titleLink.href = `/jobs/${encodeURIComponent(job.id || "")}`;
+  titleLink.textContent = job.title || "Vị trí tuyển dụng";
+  title.append(titleLink);
 
   const detail = document.createElement("p");
   detail.className = "job-card-meta";
@@ -222,9 +227,9 @@ function createJobCard(job) {
   const actions = document.createElement("div");
   actions.className = "job-card-actions";
 
-  const detailButton = document.createElement("button");
-  detailButton.type = "button";
+  const detailButton = document.createElement("a");
   detailButton.className = "job-detail-button";
+  detailButton.href = `/jobs/${encodeURIComponent(job.id || "")}`;
   detailButton.dataset.jobDetails = job.id || "";
   detailButton.textContent = "Xem chi tiết";
 
@@ -621,4 +626,14 @@ async function parseJson(response) {
   }
 }
 
-loadJobs();
+async function applyUrlState() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("apply") !== "1") return;
+
+  const position = params.get("position") || "";
+  const trigger = document.createElement("button");
+  trigger.dataset.position = position;
+  openModal("candidateModal", trigger);
+}
+
+loadJobs().finally(applyUrlState);

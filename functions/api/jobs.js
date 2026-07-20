@@ -1,4 +1,5 @@
 import { loadJobs } from "../_lib/jobs.js";
+import { isJobActive } from "../_lib/seo.js";
 
 export async function onRequestGet(context) {
   const { env } = context;
@@ -12,7 +13,7 @@ export async function onRequestGet(context) {
 
   try {
     const jobs = (await loadJobs(env.CV_BUCKET))
-      .filter((job) => job.published)
+      .filter((job) => isJobActive(job))
       .sort(sortNewestFirst);
 
     return json({ success: true, jobs });

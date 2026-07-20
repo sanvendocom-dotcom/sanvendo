@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/jobs
+Disallow: /api/upload-cv
+Disallow: /api/recruitment-request
+
+Sitemap: https://sanvendo.com/sitemap.xml

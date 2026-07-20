@@ -12,6 +12,16 @@ export const JOB_CATEGORIES = [
 ];
 
 const DEFAULT_CREATED_AT = "2026-07-20T00:00:00.000Z";
+const EMPLOYMENT_TYPES = new Set([
+  "FULL_TIME",
+  "PART_TIME",
+  "CONTRACTOR",
+  "TEMPORARY",
+  "INTERN",
+  "VOLUNTEER",
+  "PER_DIEM",
+  "OTHER",
+]);
 
 export const DEFAULT_JOBS = [
   {
@@ -152,8 +162,11 @@ export function cleanJobInput(value) {
 
   return {
     title: cleanText(source.title, 160),
+    companyName: cleanText(source.companyName, 160),
     category: JOB_CATEGORIES.includes(category) ? category : "",
     location: cleanText(source.location, 120),
+    employmentType: EMPLOYMENT_TYPES.has(source.employmentType) ? source.employmentType : "",
+    validThrough: cleanDateOnly(source.validThrough),
     experience: cleanText(source.experience, 160),
     workHours: cleanText(source.workHours, 160),
     summary: cleanMultilineText(source.summary, 1200),
@@ -237,6 +250,13 @@ function cleanLogo(value) {
 function cleanIsoDate(value) {
   const date = new Date(value || "");
   return Number.isNaN(date.getTime()) ? "" : date.toISOString();
+}
+
+function cleanDateOnly(value) {
+  const text = String(value || "").trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) return "";
+  const date = new Date(`${text}T00:00:00Z`);
+  return Number.isNaN(date.getTime()) ? "" : text;
 }
 
 function cloneDefaults() {

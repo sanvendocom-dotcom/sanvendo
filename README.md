@@ -144,3 +144,83 @@ Sau khi cập nhật mã, triển khai lại bản Production rồi gửi một 
 - Mỗi tin có thêm: thời gian làm việc, giới thiệu ngắn, mô tả công việc, yêu cầu ứng viên, quyền lợi và thông tin bổ sung.
 - Trang chủ có nút `Xem chi tiết`, mở cửa sổ đầy đủ và cho phép ứng tuyển đúng vị trí.
 - Tin cũ vẫn hoạt động; các trường mới có thể để trống và bổ sung dần trong `/admin`.
+
+## SEO và lập chỉ mục nhanh cho tin tuyển dụng
+
+Phiên bản 3.2.0 bổ sung:
+
+- Trang chi tiết riêng cho từng tin: `https://sanvendo.com/jobs/<ma-tin>`.
+- HTML việc làm được dựng sẵn từ máy chủ ở trang chủ, giúp bot đọc được nội dung và liên kết ngay cả trước khi JavaScript chạy.
+- Sitemap động tại `https://sanvendo.com/sitemap.xml`, tự thêm tin đang hiển thị và tự bỏ tin hết hạn.
+- `robots.txt`, canonical, Open Graph, Organization/WebSite schema và chặn lập chỉ mục tên miền `*.pages.dev`.
+- Dữ liệu có cấu trúc `JobPosting` cho tin có đủ tên doanh nghiệp, mô tả công việc và yêu cầu ứng viên.
+- Thông báo IndexNow khi admin đăng, sửa, ẩn hoặc xóa tin.
+- Tùy chọn thông báo Google Indexing API riêng cho các trang đủ điều kiện `JobPosting`.
+
+### Trường mới trong `/admin`
+
+Khi tạo hoặc sửa tin, nên điền đủ:
+
+- Doanh nghiệp tuyển dụng.
+- Loại hình việc làm.
+- Hạn ứng tuyển.
+- Giới thiệu ngắn.
+- Mô tả công việc.
+- Yêu cầu ứng viên.
+- Quyền lợi.
+
+Chỉ dùng tin tuyển dụng có thật và còn nhận hồ sơ. Tin không đủ nội dung vẫn có trang riêng và nằm trong sitemap, nhưng mã `JobPosting` sẽ không được thêm để tránh dữ liệu có cấu trúc không chính xác.
+
+### Bật IndexNow
+
+Tạo một chuỗi ngẫu nhiên dài, ví dụ:
+
+```bash
+openssl rand -hex 24
+```
+
+Thêm vào **Production → Variables and Secrets**:
+
+```text
+INDEXNOW_KEY = <chuỗi-vừa-tạo>
+```
+
+Trang xác minh khóa được phục vụ tự động tại:
+
+```text
+https://sanvendo.com/api/indexnow-key
+```
+
+### Bật Google Indexing API cho tin tuyển dụng
+
+Đây là cấu hình tùy chọn. Cần hoàn tất trong Google Cloud và Google Search Console trước:
+
+1. Xác minh quyền sở hữu `https://sanvendo.com/` trong Search Console.
+2. Tạo Google Cloud project, bật Indexing API và tạo service account.
+3. Thêm email service account làm chủ sở hữu của Search Console property.
+4. Tải JSON key của service account.
+5. Dán toàn bộ JSON vào Cloudflare secret:
+
+```text
+GOOGLE_INDEXING_SERVICE_ACCOUNT = {"type":"service_account",...}
+```
+
+Không tải tệp JSON khóa lên GitHub. Khi biến này chưa được cấu hình, website vẫn hoạt động bình thường và vẫn dùng sitemap + IndexNow.
+
+### Cấu hình miền chính tùy chọn
+
+Mặc định mã dùng `https://sanvendo.com`. Nếu đổi tên miền, thêm:
+
+```text
+SITE_ORIGIN = https://ten-mien-moi.example
+```
+
+Đồng thời cập nhật URL cố định trong `public/index.html` và `public/robots.txt`.
+
+### Sau khi triển khai
+
+1. Mở `https://sanvendo.com/robots.txt`.
+2. Mở `https://sanvendo.com/sitemap.xml`.
+3. Mở một URL `https://sanvendo.com/jobs/<ma-tin>`.
+4. Gửi sitemap trong Google Search Console và Bing Webmaster Tools.
+5. Kiểm tra một tin đầy đủ bằng Google Rich Results Test.

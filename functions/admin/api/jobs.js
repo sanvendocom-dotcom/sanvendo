@@ -6,6 +6,7 @@ import {
   saveJobs,
   validateJob,
 } from "../../_lib/jobs.js";
+import { notifyJobChange } from "../../_lib/search-indexing.js";
 
 export async function onRequestGet(context) {
   const bucketError = requireBucket(context.env);
@@ -44,6 +45,7 @@ export async function onRequestPost(context) {
 
     jobs.unshift(job);
     await saveJobs(context.env.CV_BUCKET, jobs);
+    if (job.published) context.waitUntil?.(notifyJobChange(context.env, job, "URL_UPDATED"));
     return json({ success: true, message: "Đã đăng tin tuyển dụng.", job }, 201);
   } catch (error) {
     console.error("Admin jobs POST error", error);
@@ -71,8 +73,9 @@ export async function onRequestPut(context) {
     const index = jobs.findIndex((job) => job.id === id);
     if (index < 0) return json({ success: false, message: "Không tìm thấy tin tuyển dụng." }, 404);
 
+    const previousJob = jobs[index];
     const job = {
-      ...jobs[index],
+      ...previousJob,
       ...clean,
       id,
       updatedAt: new Date().toISOString(),
@@ -80,6 +83,10 @@ export async function onRequestPut(context) {
     jobs[index] = job;
 
     await saveJobs(context.env.CV_BUCKET, jobs);
+    const notificationType = job.published ? "URL_UPDATED" : "URL_DELETED";
+    if (job.published || previousJob.published) {
+      context.waitUntil?.(notifyJobChange(context.env, job, notificationType));
+    }
     return json({ success: true, message: "Đã cập nhật tin tuyển dụng.", job });
   } catch (error) {
     console.error("Admin jobs PUT error", error);
@@ -99,12 +106,14 @@ export async function onRequestDelete(context) {
     if (!id) return json({ success: false, message: "Thiếu mã tin cần xóa." }, 400);
 
     const jobs = await loadJobs(context.env.CV_BUCKET);
+    const deletedJob = jobs.find((job) => job.id === id);
     const nextJobs = jobs.filter((job) => job.id !== id);
     if (nextJobs.length === jobs.length) {
       return json({ success: false, message: "Không tìm thấy tin tuyển dụng." }, 404);
     }
 
     await saveJobs(context.env.CV_BUCKET, nextJobs);
+    if (deletedJob) context.waitUntil?.(notifyJobChange(context.env, deletedJob, "URL_DELETED"));
     return json({ success: true, message: "Đã xóa tin tuyển dụng." });
   } catch (error) {
     console.error("Admin jobs DELETE error", error);
