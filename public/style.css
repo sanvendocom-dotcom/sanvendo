@@ -1459,3 +1459,12 @@ img {
   opacity: 0.72;
   transform: none;
 }
+
+.job-loading {
+  margin: 0;
+  padding: 34px 20px;
+  color: var(--muted);
+  text-align: center;
+  background: var(--surface);
+  border-radius: 14px;
+}

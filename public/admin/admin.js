@@ -1,4 +1,6 @@
 const state = {
+  jobs: [],
+  jobsLoading: false,
   candidates: createListState(),
   requests: createListState(),
 };
@@ -7,10 +9,29 @@ const elements = {
   adminEmail: document.getElementById("adminEmail"),
   logoutLink: document.getElementById("logoutLink"),
   refreshButton: document.getElementById("refreshButton"),
+  jobCount: document.getElementById("jobCount"),
   requestCount: document.getElementById("requestCount"),
   candidateCount: document.getElementById("candidateCount"),
   visibleSize: document.getElementById("visibleSize"),
   lastUpdated: document.getElementById("lastUpdated"),
+
+  jobs: {
+    form: document.getElementById("jobForm"),
+    id: document.getElementById("jobId"),
+    title: document.getElementById("jobTitle"),
+    category: document.getElementById("jobCategory"),
+    location: document.getElementById("jobLocation"),
+    experience: document.getElementById("jobExperience"),
+    salary: document.getElementById("jobSalary"),
+    logo: document.getElementById("jobLogo"),
+    published: document.getElementById("jobPublished"),
+    submitButton: document.getElementById("jobSubmitButton"),
+    cancelEditButton: document.getElementById("jobCancelEditButton"),
+    statusMessage: document.getElementById("jobStatusMessage"),
+    rows: document.getElementById("jobRows"),
+    emptyState: document.getElementById("jobEmptyState"),
+    loadingState: document.getElementById("jobLoadingState"),
+  },
 
   requests: {
     searchForm: document.getElementById("requestSearchForm"),
@@ -56,6 +77,7 @@ async function initialize() {
   bindEvents();
   await Promise.all([
     loadIdentity(),
+    loadJobs(),
     loadRequests({ reset: true }),
     loadCandidates({ reset: true }),
   ]);
@@ -66,6 +88,7 @@ function bindEvents() {
     elements.refreshButton.disabled = true;
     try {
       await Promise.all([
+        loadJobs(),
         loadRequests({ reset: true }),
         loadCandidates({ reset: true }),
       ]);
@@ -73,6 +96,10 @@ function bindEvents() {
       elements.refreshButton.disabled = false;
     }
   });
+
+  elements.jobs.form.addEventListener("submit", submitJobForm);
+  elements.jobs.cancelEditButton.addEventListener("click", resetJobForm);
+  elements.jobs.rows.addEventListener("click", handleJobTableClick);
 
   bindListEvents("requests", loadRequests);
   bindListEvents("candidates", loadCandidates);
@@ -115,8 +142,194 @@ async function loadIdentity() {
     elements.logoutLink.href = result.logoutUrl || "/cdn-cgi/access/logout";
   } catch (error) {
     elements.adminEmail.textContent = "Không xác định";
-    showError(elements.requests, error.message);
+    showJobStatus(error.message, "error");
   }
+}
+
+async function loadJobs() {
+  if (state.jobsLoading) return;
+  state.jobsLoading = true;
+  setJobLoading(true);
+
+  try {
+    const response = await fetch("/admin/api/jobs", {
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+    });
+    const result = await parseJson(response);
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Không thể tải tin tuyển dụng.");
+    }
+
+    state.jobs = Array.isArray(result.jobs) ? result.jobs : [];
+    renderJobs();
+  } catch (error) {
+    showJobStatus(error.message, "error");
+  } finally {
+    state.jobsLoading = false;
+    setJobLoading(false);
+    renderJobs();
+  }
+}
+
+async function submitJobForm(event) {
+  event.preventDefault();
+  hideJobStatus();
+
+  if (!elements.jobs.form.checkValidity()) {
+    elements.jobs.form.reportValidity();
+    return;
+  }
+
+  const id = elements.jobs.id.value.trim();
+  const payload = {
+    id,
+    title: elements.jobs.title.value.trim(),
+    category: elements.jobs.category.value,
+    location: elements.jobs.location.value.trim(),
+    experience: elements.jobs.experience.value.trim(),
+    salary: elements.jobs.salary.value.trim(),
+    logo: elements.jobs.logo.value.trim(),
+    published: elements.jobs.published.checked,
+  };
+
+  elements.jobs.submitButton.disabled = true;
+  elements.jobs.cancelEditButton.disabled = true;
+  elements.jobs.submitButton.textContent = id ? "Đang cập nhật..." : "Đang đăng tin...";
+
+  try {
+    const response = await fetch("/admin/api/jobs", {
+      method: id ? "PUT" : "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+    const result = await parseJson(response);
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Không thể lưu tin tuyển dụng.");
+    }
+
+    resetJobForm();
+    await loadJobs();
+    showJobStatus(result.message || "Đã lưu tin tuyển dụng.", "success");
+  } catch (error) {
+    showJobStatus(error.message, "error");
+  } finally {
+    elements.jobs.submitButton.disabled = false;
+    elements.jobs.cancelEditButton.disabled = false;
+    elements.jobs.submitButton.textContent = elements.jobs.id.value
+      ? "Cập nhật tin"
+      : "Đăng tin";
+  }
+}
+
+async function handleJobTableClick(event) {
+  const button = event.target.closest("button[data-job-action]");
+  if (!button) return;
+
+  const job = state.jobs.find((item) => item.id === button.dataset.jobId);
+  if (!job) return;
+
+  if (button.dataset.jobAction === "edit") {
+    startEditingJob(job);
+    return;
+  }
+
+  if (button.dataset.jobAction === "delete") {
+    const confirmed = window.confirm(`Xóa tin “${job.title}”? Thao tác này không thể hoàn tác.`);
+    if (!confirmed) return;
+
+    button.disabled = true;
+    try {
+      const response = await fetch(
+        `/admin/api/jobs?id=${encodeURIComponent(job.id)}`,
+        {
+          method: "DELETE",
+          headers: { Accept: "application/json" },
+        }
+      );
+      const result = await parseJson(response);
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || "Không thể xóa tin tuyển dụng.");
+      }
+
+      if (elements.jobs.id.value === job.id) resetJobForm();
+      await loadJobs();
+      showJobStatus(result.message || "Đã xóa tin tuyển dụng.", "success");
+    } catch (error) {
+      showJobStatus(error.message, "error");
+    } finally {
+      button.disabled = false;
+    }
+  }
+}
+
+function startEditingJob(job) {
+  elements.jobs.id.value = job.id || "";
+  elements.jobs.title.value = job.title || "";
+  elements.jobs.category.value = job.category || "";
+  elements.jobs.location.value = job.location || "";
+  elements.jobs.experience.value = job.experience || "";
+  elements.jobs.salary.value = job.salary || "";
+  elements.jobs.logo.value = job.logo || "";
+  elements.jobs.published.checked = job.published !== false;
+  elements.jobs.submitButton.textContent = "Cập nhật tin";
+  elements.jobs.cancelEditButton.classList.remove("hidden");
+  hideJobStatus();
+  elements.jobs.form.scrollIntoView({ behavior: "smooth", block: "center" });
+  window.setTimeout(() => elements.jobs.title.focus(), 350);
+}
+
+function resetJobForm() {
+  elements.jobs.form.reset();
+  elements.jobs.id.value = "";
+  elements.jobs.published.checked = true;
+  elements.jobs.submitButton.textContent = "Đăng tin";
+  elements.jobs.cancelEditButton.classList.add("hidden");
+}
+
+function renderJobs() {
+  elements.jobs.rows.replaceChildren();
+
+  for (const job of state.jobs) {
+    elements.jobs.rows.append(createJobRow(job));
+  }
+
+  const isEmpty = !state.jobsLoading && state.jobs.length === 0;
+  elements.jobs.emptyState.classList.toggle("hidden", !isEmpty);
+  updateStats();
+}
+
+function createJobRow(job) {
+  const row = document.createElement("tr");
+
+  row.append(
+    createCell([
+      textElement("p", job.title || "Chưa có tên vị trí", "candidate-name"),
+      textElement("span", job.logo || "Không có ký hiệu", "reference"),
+      textElement("span", `Cập nhật: ${formatDate(job.updatedAt)}`, "secondary-text"),
+    ]),
+    createCell([badgeElement(job.category || "Khác")]),
+    createCell([
+      textElement("span", job.location || "Chưa cung cấp", "candidate-name"),
+      textElement("span", job.experience || "Không ghi yêu cầu kinh nghiệm", "secondary-text"),
+    ]),
+    createCell([textElement("span", job.salary || "Thỏa thuận", "candidate-name")]),
+    createCell([
+      statusBadgeElement(job.published !== false ? "Đang hiển thị" : "Đang ẩn", job.published !== false),
+    ]),
+    createCell([
+      jobActionButton("Sửa", "edit", job.id, "edit-button"),
+      jobActionButton("Xóa", "delete", job.id, "delete-button"),
+    ], "action-cell")
+  );
+
+  return row;
 }
 
 async function loadRequests({ reset }) {
@@ -129,7 +342,6 @@ async function loadRequests({ reset }) {
   hideError(group);
 
   if (reset) resetListState(listState, renderRequests);
-
   const params = buildParams(listState, reset);
 
   try {
@@ -171,7 +383,6 @@ async function loadCandidates({ reset }) {
   hideError(group);
 
   if (reset) resetListState(listState, renderCandidates);
-
   const params = buildParams(listState, reset);
 
   try {
@@ -259,9 +470,7 @@ function createRequestRow(request) {
       textElement("span", formatRelativeTime(request.submittedAt), "secondary-text"),
       labeledText("Cần nhân sự", request.deadline || "Chưa cung cấp"),
     ]),
-    createCell([
-      descriptionElement(request.description || "Không có mô tả thêm"),
-    ])
+    createCell([descriptionElement(request.description || "Không có mô tả thêm")])
   );
 
   return row;
@@ -335,8 +544,9 @@ function updateListFooter(group, listState, noun) {
   group.scanSummary.textContent = summaryParts.join(" · ");
 }
 
-function createCell(children) {
+function createCell(children, className = "") {
   const cell = document.createElement("td");
+  if (className) cell.className = className;
   for (const child of children) {
     if (child) cell.append(child);
   }
@@ -385,6 +595,23 @@ function badgeElement(text) {
   return badge;
 }
 
+function statusBadgeElement(text, active) {
+  const badge = document.createElement("span");
+  badge.className = `status-badge ${active ? "active" : "inactive"}`;
+  badge.textContent = text;
+  return badge;
+}
+
+function jobActionButton(text, action, jobId, className) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = `table-action ${className}`;
+  button.dataset.jobAction = action;
+  button.dataset.jobId = jobId;
+  button.textContent = text;
+  return button;
+}
+
 function descriptionElement(text) {
   const element = document.createElement("p");
   element.className = "description-text";
@@ -402,6 +629,9 @@ function downloadElement(candidate) {
 }
 
 function updateStats() {
+  elements.jobCount.textContent = String(
+    state.jobs.filter((job) => job.published !== false).length
+  );
   elements.requestCount.textContent = String(state.requests.items.length);
   elements.candidateCount.textContent = String(state.candidates.items.length);
 
@@ -412,6 +642,7 @@ function updateStats() {
   elements.visibleSize.textContent = formatBytes(totalSize);
 
   const newest = [
+    ...state.jobs.map((item) => Date.parse(item.updatedAt || 0)),
     ...state.requests.items.map((item) => Date.parse(item.submittedAt || 0)),
     ...state.candidates.items.map((item) => Date.parse(item.uploadedAt || 0)),
   ]
@@ -424,6 +655,22 @@ function updateStats() {
         timeStyle: "short",
       }).format(new Date(newest))
     : "—";
+}
+
+function setJobLoading(isLoading) {
+  elements.jobs.loadingState.classList.toggle("hidden", !isLoading);
+}
+
+function showJobStatus(message, type) {
+  elements.jobs.statusMessage.textContent = message || "Đã xảy ra lỗi.";
+  elements.jobs.statusMessage.classList.remove("hidden", "success");
+  if (type === "success") elements.jobs.statusMessage.classList.add("success");
+}
+
+function hideJobStatus() {
+  elements.jobs.statusMessage.textContent = "";
+  elements.jobs.statusMessage.classList.add("hidden");
+  elements.jobs.statusMessage.classList.remove("success");
 }
 
 function setLoading(group, isLoading) {

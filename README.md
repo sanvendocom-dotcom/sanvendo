@@ -2,11 +2,11 @@
 
 Phiên bản này bao gồm:
 
-- Website tuyển dụng công khai.
+- Website tuyển dụng công khai với tin việc làm tải động theo ngành nghề.
 - Form doanh nghiệp lưu yêu cầu tuyển dụng thật vào R2 và hiển thị trong trang quản trị.
 - Form ứng viên cho phép gửi thông tin không cần CV; CV PDF/DOC/DOCX là tùy chọn, tối đa 10 MB.
 - Lưu CV hoặc bản ghi thông tin ứng viên không có CV vào bucket R2 riêng tư `sanvendo-private-cv`.
-- Trang quản trị tại `https://sanvendo.com/admin`.
+- Trang quản trị tại `https://sanvendo.com/admin` để thêm, sửa, ẩn và xóa tin tuyển dụng.
 - Danh sách, tìm kiếm và tải CV an toàn.
 - Kiểm tra chữ ký JWT của Cloudflare Access trước khi cho phép truy cập `/admin`.
 - Chặn truy cập quản trị qua `sanvendo.pages.dev`.
@@ -25,15 +25,18 @@ public/
 
 functions/
 ├── _lib/
-│   └── access.js
+│   ├── access.js
+│   └── jobs.js
 ├── admin/
 │   ├── _middleware.js
 │   └── api/
 │       ├── candidates.js
 │       ├── download.js
+│       ├── jobs.js
 │       ├── me.js
 │       └── requests.js
 └── api/
+    ├── jobs.js
     ├── recruitment-request.js
     └── upload-cv.js
 ```
@@ -87,10 +90,12 @@ Giải nén ZIP và tải toàn bộ nội dung bên trong lên repository `sanv
 1. Mở cửa sổ ẩn danh.
 2. Truy cập `https://sanvendo.com/admin`.
 3. Đăng nhập OTP bằng `sanvendo.com@gmail.com`.
-4. Gửi thử biểu mẫu doanh nghiệp ở trang chủ; yêu cầu phải xuất hiện trong mục `Yêu cầu tuyển dụng` tại `/admin`.
-5. Danh sách hồ sơ trong R2 phải hiển thị, kể cả hồ sơ chưa gửi CV.
-6. Hồ sơ có CV hiện nút `Tải CV`; hồ sơ không có CV hiện `Chưa gửi CV`.
-7. Truy cập `https://sanvendo.pages.dev/admin` phải bị từ chối.
+4. Trong mục `Tin tuyển dụng theo ngành nghề`, thử thêm một tin, chọn ngành và bật `Hiển thị tin này trên trang chủ`.
+5. Mở lại trang chủ; tin mới phải xuất hiện trong phần việc làm và số lượng tại ô ngành nghề phải tự tăng.
+6. Gửi thử biểu mẫu doanh nghiệp ở trang chủ; yêu cầu phải xuất hiện trong mục `Yêu cầu tuyển dụng` tại `/admin`.
+7. Danh sách hồ sơ trong R2 phải hiển thị, kể cả hồ sơ chưa gửi CV.
+8. Hồ sơ có CV hiện nút `Tải CV`; hồ sơ không có CV hiện `Chưa gửi CV`.
+9. Truy cập `https://sanvendo.pages.dev/admin` phải bị từ chối.
 
 ## Đăng xuất
 
@@ -100,6 +105,16 @@ Nút Đăng xuất dẫn đến:
 https://sanvendo.com/cdn-cgi/access/logout
 ```
 
+## Quản lý tin tuyển dụng
+
+Danh sách tin được lưu trong object R2:
+
+```text
+site/jobs.json
+```
+
+Khi chưa có object này, website dùng 8 tin mẫu có sẵn, mỗi ngành một tin. Ngay lần đầu thêm, sửa, ẩn hoặc xóa trong `/admin`, toàn bộ danh sách sẽ được lưu vào R2. Không cần tạo binding hoặc biến môi trường mới.
+
 ## Lưu ý
 
-Trang quản trị phiên bản đầu đọc thông tin ứng viên từ `customMetadata` của từng object R2. Khi cần trạng thái xử lý hồ sơ, ghi chú, phân công nhân viên hoặc lịch sử thay đổi, nên bổ sung Cloudflare D1.
+Trang quản trị đọc thông tin ứng viên và yêu cầu doanh nghiệp từ R2. Khi cần trạng thái xử lý hồ sơ, ghi chú, phân công nhân viên hoặc lịch sử thay đổi, nên bổ sung Cloudflare D1.

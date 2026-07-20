@@ -31,7 +31,7 @@
         <p class="eyebrow">SANVENDO ADMIN</p>
         <h1>Thông tin đã tiếp nhận</h1>
         <p class="heading-copy">
-          Xem yêu cầu tuyển dụng của doanh nghiệp và hồ sơ ứng viên trong kho R2 riêng tư.
+          Quản lý tin tuyển dụng, xem yêu cầu doanh nghiệp và hồ sơ ứng viên trong kho R2 riêng tư.
         </p>
       </div>
 
@@ -41,6 +41,10 @@
     </section>
 
     <section class="stats-grid" aria-label="Thống kê dữ liệu">
+      <article class="stat-card">
+        <span>Tin đang hiển thị</span>
+        <strong id="jobCount">0</strong>
+      </article>
       <article class="stat-card">
         <span>Yêu cầu doanh nghiệp</span>
         <strong id="requestCount">0</strong>
@@ -57,6 +61,99 @@
         <span>Cập nhật gần nhất</span>
         <strong class="stat-date" id="lastUpdated">—</strong>
       </article>
+    </section>
+
+    <section class="panel" aria-labelledby="jobsHeading">
+      <div class="panel-heading">
+        <div>
+          <p class="panel-kicker">QUẢN LÝ NỘI DUNG TRANG CHỦ</p>
+          <h2 id="jobsHeading">Tin tuyển dụng theo ngành nghề</h2>
+          <p>Thêm, sửa, ẩn hoặc xóa tin. Số lượng trên các ô ngành nghề sẽ tự cập nhật.</p>
+        </div>
+      </div>
+
+      <form class="job-editor" id="jobForm">
+        <input id="jobId" name="id" type="hidden">
+
+        <label class="form-field form-field-wide">
+          <span>Tên vị trí *</span>
+          <input id="jobTitle" name="title" type="text" maxlength="160" required placeholder="Ví dụ: Nhân viên kinh doanh B2B">
+        </label>
+
+        <label class="form-field">
+          <span>Ngành nghề *</span>
+          <select id="jobCategory" name="category" required>
+            <option value="">Chọn ngành nghề</option>
+            <option value="Kinh doanh">Kinh doanh &amp; Bán hàng</option>
+            <option value="Marketing">Marketing &amp; Truyền thông</option>
+            <option value="Kế toán">Kế toán &amp; Tài chính</option>
+            <option value="Nhân sự">Hành chính &amp; Nhân sự</option>
+            <option value="Công nghệ">Công nghệ thông tin</option>
+            <option value="Kỹ thuật">Kỹ thuật &amp; Sản xuất</option>
+            <option value="Logistics">Kho vận &amp; Chuỗi cung ứng</option>
+            <option value="Chăm sóc khách hàng">Chăm sóc khách hàng</option>
+          </select>
+        </label>
+
+        <label class="form-field">
+          <span>Địa điểm *</span>
+          <input id="jobLocation" name="location" type="text" maxlength="120" required placeholder="Ví dụ: TP. Hồ Chí Minh">
+        </label>
+
+        <label class="form-field">
+          <span>Kinh nghiệm / yêu cầu ngắn</span>
+          <input id="jobExperience" name="experience" type="text" maxlength="160" placeholder="Ví dụ: 1–3 năm kinh nghiệm">
+        </label>
+
+        <label class="form-field">
+          <span>Mức lương *</span>
+          <input id="jobSalary" name="salary" type="text" maxlength="120" required placeholder="Ví dụ: 15–25 triệu hoặc Thỏa thuận">
+        </label>
+
+        <label class="form-field form-field-logo">
+          <span>Ký hiệu</span>
+          <input id="jobLogo" name="logo" type="text" maxlength="5" placeholder="KD">
+        </label>
+
+        <label class="publish-field">
+          <input id="jobPublished" name="published" type="checkbox" checked>
+          <span>Hiển thị tin này trên trang chủ</span>
+        </label>
+
+        <div class="editor-actions form-field-wide">
+          <button class="button button-primary" id="jobSubmitButton" type="submit">Đăng tin</button>
+          <button class="button button-secondary hidden" id="jobCancelEditButton" type="button">Hủy sửa</button>
+        </div>
+      </form>
+
+      <div class="status-message hidden" id="jobStatusMessage" role="status"></div>
+
+      <div class="table-wrap">
+        <table class="job-table">
+          <thead>
+            <tr>
+              <th>Vị trí</th>
+              <th>Ngành nghề</th>
+              <th>Địa điểm / kinh nghiệm</th>
+              <th>Mức lương</th>
+              <th>Trạng thái</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="jobRows"></tbody>
+        </table>
+      </div>
+
+      <div class="empty-state hidden" id="jobEmptyState">
+        <div class="empty-icon">JOB</div>
+        <h2>Chưa có tin tuyển dụng</h2>
+        <p>Dùng biểu mẫu phía trên để đăng tin đầu tiên.</p>
+      </div>
+
+      <div class="loading-state" id="jobLoadingState" aria-live="polite">
+        <span class="spinner" aria-hidden="true"></span>
+        <span>Đang tải tin tuyển dụng…</span>
+      </div>
     </section>
 
     <section class="panel" aria-labelledby="requestsHeading">

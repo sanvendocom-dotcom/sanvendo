@@ -3,6 +3,7 @@ const mainNav = document.getElementById("mainNav");
 const toast = document.getElementById("toast");
 
 function showToast(message) {
+  if (!toast) return;
   toast.textContent = message;
   toast.classList.add("show");
   window.clearTimeout(showToast.timer);
@@ -12,34 +13,55 @@ function showToast(message) {
 }
 
 menuToggle?.addEventListener("click", () => {
-  const isOpen = mainNav.classList.toggle("open");
-  menuToggle.setAttribute("aria-expanded", String(isOpen));
+  const isOpen = mainNav?.classList.toggle("open");
+  menuToggle.setAttribute("aria-expanded", String(Boolean(isOpen)));
 });
 
 mainNav?.querySelectorAll("a").forEach((link) => {
   link.addEventListener("click", () => {
     mainNav.classList.remove("open");
-    menuToggle.setAttribute("aria-expanded", "false");
+    menuToggle?.setAttribute("aria-expanded", "false");
   });
 });
 
-document.querySelectorAll("[data-open-modal]").forEach((button) => {
-  button.addEventListener("click", () => {
-    const modalId = button.dataset.openModal;
-    const modal = document.getElementById(modalId);
-    if (!modal) return;
+function openModal(modalId, trigger) {
+  const modal = document.getElementById(modalId);
+  if (!modal) return;
 
-    modal.classList.add("active");
-    modal.setAttribute("aria-hidden", "false");
-    document.body.classList.add("modal-open");
+  if (modalId === "requestModal") {
+    clearRequestError();
+    requestForm?.classList.remove("hidden");
+    requestSuccess?.classList.add("hidden");
+  }
 
-    const firstInput = modal.querySelector("input");
-    window.setTimeout(() => firstInput?.focus(), 100);
-  });
-});
+  if (modalId === "candidateModal") {
+    clearCandidateError();
+    candidateForm?.classList.remove("hidden");
+    candidateSuccess?.classList.add("hidden");
 
-document.querySelectorAll("[data-close-modal]").forEach((element) => {
-  element.addEventListener("click", closeAllModals);
+    const positionInput = candidateForm?.elements?.namedItem("desiredPosition");
+    if (positionInput instanceof HTMLInputElement && trigger?.dataset?.position) {
+      positionInput.value = trigger.dataset.position;
+    }
+  }
+
+  modal.classList.add("active");
+  modal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("modal-open");
+
+  const firstInput = modal.querySelector("input");
+  window.setTimeout(() => firstInput?.focus(), 100);
+}
+
+document.addEventListener("click", (event) => {
+  const openButton = event.target.closest("[data-open-modal]");
+  if (openButton) {
+    openModal(openButton.dataset.openModal, openButton);
+    return;
+  }
+
+  const closeElement = event.target.closest("[data-close-modal]");
+  if (closeElement) closeAllModals();
 });
 
 function closeAllModals() {
@@ -56,8 +78,11 @@ document.addEventListener("keydown", (event) => {
 
 const jobFilter = document.getElementById("jobFilter");
 const locationFilter = document.getElementById("locationFilter");
-const jobCards = [...document.querySelectorAll(".job-card")];
+const jobGrid = document.getElementById("jobGrid");
+const jobLoading = document.getElementById("jobLoading");
 const emptyState = document.getElementById("emptyState");
+let jobs = [];
+let jobCards = [];
 
 function normalize(text) {
   return (text || "")
@@ -65,6 +90,142 @@ function normalize(text) {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/đ/g, "d");
+}
+
+async function loadJobs() {
+  try {
+    jobLoading?.classList.remove("hidden");
+    emptyState?.classList.add("hidden");
+
+    const response = await fetch("/api/jobs", {
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+    });
+    const result = await parseJson(response);
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Không thể tải tin tuyển dụng.");
+    }
+
+    jobs = Array.isArray(result.jobs) ? result.jobs : [];
+    renderJobs();
+    updateLocationOptions();
+    updateCategoryCounts();
+    jobLoading?.classList.add("hidden");
+    filterJobs();
+  } catch (error) {
+    jobs = [];
+    renderJobs();
+    updateCategoryCounts();
+    if (emptyState) {
+      emptyState.textContent =
+        error instanceof Error
+          ? error.message
+          : "Không thể tải tin tuyển dụng. Vui lòng thử lại.";
+      emptyState.classList.remove("hidden");
+    }
+  } finally {
+    jobLoading?.classList.add("hidden");
+  }
+}
+
+function renderJobs() {
+  if (!jobGrid) return;
+  jobGrid.replaceChildren();
+
+  for (const job of jobs) {
+    jobGrid.append(createJobCard(job));
+  }
+
+  jobCards = [...jobGrid.querySelectorAll(".job-card")];
+}
+
+function createJobCard(job) {
+  const article = document.createElement("article");
+  article.className = "job-card";
+  article.dataset.title = job.title || "";
+  article.dataset.category = job.category || "";
+  article.dataset.location = job.location || "";
+  article.dataset.jobId = job.id || "";
+
+  const top = document.createElement("div");
+  top.className = "job-card-top";
+
+  const logo = document.createElement("span");
+  logo.className = "job-logo";
+  logo.textContent = job.logo || createInitials(job.title);
+
+  const saveButton = document.createElement("button");
+  saveButton.className = "save-job";
+  saveButton.type = "button";
+  saveButton.setAttribute("aria-label", "Lưu vị trí");
+  saveButton.textContent = "♡";
+
+  top.append(logo, saveButton);
+
+  const category = document.createElement("span");
+  category.className = "job-category";
+  category.textContent = job.category || "Khác";
+
+  const title = document.createElement("h3");
+  title.textContent = job.title || "Vị trí tuyển dụng";
+
+  const detail = document.createElement("p");
+  detail.textContent = [job.location, job.experience].filter(Boolean).join(" · ");
+
+  const footer = document.createElement("div");
+  footer.className = "job-footer";
+
+  const salary = document.createElement("strong");
+  salary.textContent = job.salary || "Thỏa thuận";
+
+  const applyButton = document.createElement("button");
+  applyButton.type = "button";
+  applyButton.dataset.openModal = "candidateModal";
+  applyButton.dataset.position = job.title || "";
+  applyButton.textContent = "Ứng tuyển";
+
+  footer.append(salary, applyButton);
+  article.append(top, category, title, detail, footer);
+  return article;
+}
+
+function createInitials(value) {
+  const initials = String(value || "")
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 3)
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase();
+  return initials || "SV";
+}
+
+function updateLocationOptions() {
+  if (!locationFilter) return;
+  const selected = locationFilter.value;
+  const locations = [...new Set(jobs.map((job) => job.location).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, "vi"));
+
+  locationFilter.replaceChildren(new Option("Tất cả địa điểm", ""));
+  for (const location of locations) {
+    locationFilter.append(new Option(location, location));
+  }
+
+  locationFilter.value = locations.includes(selected) ? selected : "";
+}
+
+function updateCategoryCounts() {
+  const counts = new Map();
+  for (const job of jobs) {
+    counts.set(job.category, (counts.get(job.category) || 0) + 1);
+  }
+
+  document.querySelectorAll(".category-card[data-category]").forEach((card) => {
+    const count = counts.get(card.dataset.category) || 0;
+    const label = card.querySelector("[data-category-count]");
+    if (label) label.textContent = `${count} tin đang tuyển`;
+  });
 }
 
 function filterJobs() {
@@ -85,16 +246,18 @@ function filterJobs() {
     if (visible) visibleCount += 1;
   });
 
-  emptyState.classList.toggle("hidden", visibleCount > 0);
+  if (emptyState) {
+    emptyState.textContent = "Không tìm thấy vị trí phù hợp với bộ lọc hiện tại.";
+    emptyState.classList.toggle("hidden", visibleCount > 0 || Boolean(jobLoading && !jobLoading.classList.contains("hidden")));
+  }
 }
 
 jobFilter?.addEventListener("input", filterJobs);
 locationFilter?.addEventListener("change", filterJobs);
 
-document.querySelectorAll("[data-category]").forEach((button) => {
+document.querySelectorAll(".category-card[data-category]").forEach((button) => {
   button.addEventListener("click", () => {
-    const category = button.dataset.category;
-    jobFilter.value = category;
+    if (jobFilter) jobFilter.value = button.dataset.category || "";
     filterJobs();
     document.getElementById("jobs")?.scrollIntoView({ behavior: "smooth" });
   });
@@ -102,9 +265,10 @@ document.querySelectorAll("[data-category]").forEach((button) => {
 
 document.querySelectorAll("[data-search]").forEach((button) => {
   button.addEventListener("click", () => {
-    const value = button.dataset.search;
-    document.getElementById("heroSearchInput").value = value;
-    jobFilter.value = value;
+    const value = button.dataset.search || "";
+    const heroSearchInput = document.getElementById("heroSearchInput");
+    if (heroSearchInput) heroSearchInput.value = value;
+    if (jobFilter) jobFilter.value = value;
     filterJobs();
     document.getElementById("jobs")?.scrollIntoView({ behavior: "smooth" });
   });
@@ -112,29 +276,32 @@ document.querySelectorAll("[data-search]").forEach((button) => {
 
 document.getElementById("heroSearch")?.addEventListener("submit", (event) => {
   event.preventDefault();
-  const keyword = document.getElementById("heroSearchInput").value.trim();
-  jobFilter.value = keyword;
+  const keyword = document.getElementById("heroSearchInput")?.value.trim() || "";
+  if (jobFilter) jobFilter.value = keyword;
   filterJobs();
   document.getElementById("jobs")?.scrollIntoView({ behavior: "smooth" });
 });
 
-document.querySelectorAll(".save-job").forEach((button) => {
-  button.addEventListener("click", () => {
-    const saved = button.classList.toggle("saved");
-    button.textContent = saved ? "♥" : "♡";
-    showToast(saved ? "Đã lưu vị trí." : "Đã bỏ lưu vị trí.");
-  });
+jobGrid?.addEventListener("click", (event) => {
+  const button = event.target.closest(".save-job");
+  if (!button) return;
+
+  const saved = button.classList.toggle("saved");
+  button.textContent = saved ? "♥" : "♡";
+  showToast(saved ? "Đã lưu vị trí." : "Đã bỏ lưu vị trí.");
 });
 
 document.querySelectorAll(".faq-question").forEach((button) => {
   button.addEventListener("click", () => {
     const item = button.closest(".faq-item");
-    const answer = item.querySelector(".faq-answer");
+    const answer = item?.querySelector(".faq-answer");
+    if (!item || !answer) return;
     const isOpen = item.classList.contains("open");
 
     document.querySelectorAll(".faq-item.open").forEach((openItem) => {
       openItem.classList.remove("open");
-      openItem.querySelector(".faq-answer").style.maxHeight = null;
+      const openAnswer = openItem.querySelector(".faq-answer");
+      if (openAnswer) openAnswer.style.maxHeight = null;
     });
 
     if (!isOpen) {
@@ -151,11 +318,13 @@ const requestSuccess = document.getElementById("requestSuccess");
 const requestReference = document.getElementById("requestReference");
 
 function showRequestError(message) {
+  if (!requestError) return;
   requestError.textContent = message;
   requestError.classList.remove("hidden");
 }
 
 function clearRequestError() {
+  if (!requestError) return;
   requestError.textContent = "";
   requestError.classList.add("hidden");
 }
@@ -169,36 +338,29 @@ requestForm?.addEventListener("submit", async (event) => {
     return;
   }
 
-  const originalButtonText = requestSubmit.textContent;
+  const originalButtonText = requestSubmit?.textContent || "Gửi yêu cầu";
 
   try {
-    requestSubmit.disabled = true;
-    requestSubmit.textContent = "Đang gửi yêu cầu...";
+    if (requestSubmit) {
+      requestSubmit.disabled = true;
+      requestSubmit.textContent = "Đang gửi yêu cầu...";
+    }
 
     const response = await fetch("/api/recruitment-request", {
       method: "POST",
       body: new FormData(requestForm),
       headers: { Accept: "application/json" },
     });
-
-    let result;
-    try {
-      result = await response.json();
-    } catch {
-      result = {
-        success: false,
-        message: "Máy chủ trả về phản hồi không hợp lệ.",
-      };
-    }
+    const result = await parseJson(response);
 
     if (!response.ok || !result.success) {
       throw new Error(result.message || "Không thể gửi yêu cầu tuyển dụng.");
     }
 
-    requestReference.textContent = result.reference || "Đã tiếp nhận";
+    if (requestReference) requestReference.textContent = result.reference || "Đã tiếp nhận";
     requestForm.reset();
     requestForm.classList.add("hidden");
-    requestSuccess.classList.remove("hidden");
+    requestSuccess?.classList.remove("hidden");
   } catch (error) {
     showRequestError(
       error instanceof Error
@@ -206,18 +368,11 @@ requestForm?.addEventListener("submit", async (event) => {
         : "Không thể gửi yêu cầu. Vui lòng thử lại."
     );
   } finally {
-    requestSubmit.disabled = false;
-    requestSubmit.textContent = originalButtonText;
+    if (requestSubmit) {
+      requestSubmit.disabled = false;
+      requestSubmit.textContent = originalButtonText;
+    }
   }
-});
-
-// Khi mở lại biểu mẫu doanh nghiệp, hiển thị form để có thể gửi yêu cầu mới.
-document.querySelectorAll('[data-open-modal="requestModal"]').forEach((button) => {
-  button.addEventListener("click", () => {
-    clearRequestError();
-    requestForm?.classList.remove("hidden");
-    requestSuccess?.classList.add("hidden");
-  });
 });
 
 const candidateForm = document.getElementById("candidateForm");
@@ -235,35 +390,27 @@ function getFileExtension(filename) {
 }
 
 function showCandidateError(message) {
+  if (!candidateError) return;
   candidateError.textContent = message;
   candidateError.classList.remove("hidden");
 }
 
 function clearCandidateError() {
+  if (!candidateError) return;
   candidateError.textContent = "";
   candidateError.classList.add("hidden");
 }
 
 function validateCvFile(file) {
-  // CV là tùy chọn. Chỉ kiểm tra định dạng và dung lượng khi người dùng có chọn tệp.
-  if (!file || !file.name || file.size === 0) {
-    return "";
-  }
+  if (!file || !file.name || file.size === 0) return "";
 
   const extension = getFileExtension(file.name);
-
   if (!ALLOWED_CV_EXTENSIONS.has(extension)) {
     return "Chỉ chấp nhận file PDF, DOC hoặc DOCX.";
   }
-
-  if (file.size <= 0) {
-    return "File CV đang trống.";
-  }
-
   if (file.size > MAX_CV_SIZE) {
     return "Dung lượng CV tối đa là 10 MB.";
   }
-
   return "";
 }
 
@@ -282,46 +429,35 @@ candidateForm?.addEventListener("submit", async (event) => {
     return;
   }
 
-  const file = cvFileInput?.files?.[0];
-  const fileError = validateCvFile(file);
-
+  const fileError = validateCvFile(cvFileInput?.files?.[0]);
   if (fileError) {
     showCandidateError(fileError);
     return;
   }
 
-  const originalButtonText = candidateSubmit.textContent;
+  const originalButtonText = candidateSubmit?.textContent || "Gửi hồ sơ";
 
   try {
-    candidateSubmit.disabled = true;
-    candidateSubmit.textContent = "Đang gửi hồ sơ...";
+    if (candidateSubmit) {
+      candidateSubmit.disabled = true;
+      candidateSubmit.textContent = "Đang gửi hồ sơ...";
+    }
 
     const response = await fetch("/api/upload-cv", {
       method: "POST",
       body: new FormData(candidateForm),
-      headers: {
-        Accept: "application/json",
-      },
+      headers: { Accept: "application/json" },
     });
-
-    let result;
-    try {
-      result = await response.json();
-    } catch {
-      result = {
-        success: false,
-        message: "Máy chủ trả về phản hồi không hợp lệ.",
-      };
-    }
+    const result = await parseJson(response);
 
     if (!response.ok || !result.success) {
       throw new Error(result.message || "Không thể gửi hồ sơ.");
     }
 
-    candidateReference.textContent = result.reference || "Đã tiếp nhận";
+    if (candidateReference) candidateReference.textContent = result.reference || "Đã tiếp nhận";
     candidateForm.reset();
     candidateForm.classList.add("hidden");
-    candidateSuccess.classList.remove("hidden");
+    candidateSuccess?.classList.remove("hidden");
   } catch (error) {
     showCandidateError(
       error instanceof Error
@@ -329,26 +465,19 @@ candidateForm?.addEventListener("submit", async (event) => {
         : "Không thể gửi hồ sơ. Vui lòng thử lại."
     );
   } finally {
-    candidateSubmit.disabled = false;
-    candidateSubmit.textContent = originalButtonText;
+    if (candidateSubmit) {
+      candidateSubmit.disabled = false;
+      candidateSubmit.textContent = originalButtonText;
+    }
   }
 });
 
-// Điền sẵn vị trí khi ứng viên bấm nút “Ứng tuyển” tại một tin việc làm.
-document.querySelectorAll('[data-open-modal="candidateModal"][data-position]').forEach((button) => {
-  button.addEventListener("click", () => {
-    const positionInput = candidateForm?.elements?.namedItem("desiredPosition");
-    if (positionInput instanceof HTMLInputElement) {
-      positionInput.value = button.dataset.position || "";
-    }
-  });
-});
+async function parseJson(response) {
+  try {
+    return await response.json();
+  } catch {
+    return { success: false, message: "Máy chủ trả về phản hồi không hợp lệ." };
+  }
+}
 
-// Khi mở lại modal, hiển thị lại form để có thể gửi hồ sơ mới.
-document.querySelectorAll('[data-open-modal="candidateModal"]').forEach((button) => {
-  button.addEventListener("click", () => {
-    clearCandidateError();
-    candidateForm?.classList.remove("hidden");
-    candidateSuccess?.classList.add("hidden");
-  });
-});
+loadJobs();
