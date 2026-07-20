@@ -58,3 +58,36 @@ test("lưu và đọc lại các trường chi tiết từ R2", async () => {
   assert.equal(loaded[0].requirements, "Có 2 năm kinh nghiệm");
   assert.equal(loaded[0].benefits, "BHXH đầy đủ");
 });
+
+
+test("chuẩn hóa dữ liệu tin nổi bật đầu trang", () => {
+  const job = cleanJobInput({
+    title: "Trưởng phòng Kinh doanh",
+    category: "Kinh doanh",
+    location: "TP. Hồ Chí Minh",
+    salary: "Thỏa thuận",
+    featured: true,
+    featuredTags: [" B2B ", "Quản lý đội nhóm", "5+ năm", "Thẻ thứ tư"],
+    targetCandidates: "5–8 ứng viên",
+    featuredBadge: "Đang tuyển",
+    published: true,
+  });
+
+  assert.equal(job.featured, true);
+  assert.deepEqual(job.featuredTags, ["B2B", "Quản lý đội nhóm", "5+ năm"]);
+  assert.equal(job.targetCandidates, "5–8 ứng viên");
+  assert.equal(job.featuredBadge, "Đang tuyển");
+});
+
+test("tin đang ẩn không được đặt làm tin nổi bật", () => {
+  const job = cleanJobInput({
+    title: "Trưởng phòng Kinh doanh",
+    category: "Kinh doanh",
+    location: "TP. Hồ Chí Minh",
+    salary: "Thỏa thuận",
+    featured: true,
+    published: false,
+  });
+
+  assert.equal(job.featured, false);
+});

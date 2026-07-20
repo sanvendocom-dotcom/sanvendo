@@ -32,6 +32,10 @@ export const DEFAULT_JOBS = [
     experience: "1–3 năm kinh nghiệm",
     salary: "15–25 triệu",
     logo: "KD",
+    featured: true,
+    featuredTags: ["B2B", "Phát triển khách hàng", "1–3 năm"],
+    targetCandidates: "5–8 ứng viên",
+    featuredBadge: "Mới",
     published: true,
     createdAt: DEFAULT_CREATED_AT,
     updatedAt: DEFAULT_CREATED_AT,
@@ -159,6 +163,7 @@ export async function saveJobs(bucket, jobs) {
 export function cleanJobInput(value) {
   const source = value && typeof value === "object" ? value : {};
   const category = cleanText(source.category, 80);
+  const published = source.published !== false;
 
   return {
     title: cleanText(source.title, 160),
@@ -176,7 +181,11 @@ export function cleanJobInput(value) {
     additionalInfo: cleanMultilineText(source.additionalInfo, 3000),
     salary: cleanText(source.salary, 120),
     logo: cleanLogo(source.logo),
-    published: source.published !== false,
+    featured: published && source.featured === true,
+    featuredTags: cleanTagList(source.featuredTags),
+    targetCandidates: cleanText(source.targetCandidates, 80),
+    featuredBadge: cleanText(source.featuredBadge, 30) || "Mới",
+    published,
   };
 }
 
@@ -238,6 +247,20 @@ function cleanMultilineText(value, maxLength) {
     .join("\n")
     .trim()
     .slice(0, maxLength);
+}
+
+function cleanTagList(value) {
+  const source = Array.isArray(value) ? value : String(value || "").split(",");
+  const unique = [];
+
+  for (const item of source) {
+    const tag = cleanText(item, 40);
+    if (!tag || unique.includes(tag)) continue;
+    unique.push(tag);
+    if (unique.length === 3) break;
+  }
+
+  return unique;
 }
 
 function cleanLogo(value) {

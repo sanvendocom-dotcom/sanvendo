@@ -43,6 +43,10 @@ export async function onRequestPost(context) {
       updatedAt: now,
     };
 
+    if (job.featured) {
+      for (const existingJob of jobs) existingJob.featured = false;
+    }
+
     jobs.unshift(job);
     await saveJobs(context.env.CV_BUCKET, jobs);
     if (job.published) context.waitUntil?.(notifyJobChange(context.env, job, "URL_UPDATED"));
@@ -81,6 +85,12 @@ export async function onRequestPut(context) {
       updatedAt: new Date().toISOString(),
     };
     jobs[index] = job;
+
+    if (job.featured) {
+      for (let jobIndex = 0; jobIndex < jobs.length; jobIndex += 1) {
+        if (jobIndex !== index) jobs[jobIndex].featured = false;
+      }
+    }
 
     await saveJobs(context.env.CV_BUCKET, jobs);
     const notificationType = job.published ? "URL_UPDATED" : "URL_DELETED";

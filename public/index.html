@@ -18,7 +18,7 @@
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="Sanvendo — Việc làm, tuyển dụng &amp; headhunting" />
   <meta name="twitter:description" content="Tìm việc làm phù hợp hoặc gửi yêu cầu tuyển dụng nhân sự theo nhu cầu doanh nghiệp." />
-  <link rel="stylesheet" href="/style.css?v=20260720-4" />
+  <link rel="stylesheet" href="/style.css?v=20260720-5" />
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -124,25 +124,28 @@
           </div>
         </div>
 
-        <aside class="hero-panel">
+        <!-- FEATURED_JOB_START -->
+        <aside class="hero-panel" id="featuredJobPanel">
           <div class="panel-header">
             <div>
               <span class="status-dot"></span>
               <span>Yêu cầu đang được quan tâm</span>
             </div>
-            <span class="mini-badge">Mới</span>
+            <span class="mini-badge" id="featuredJobBadge">Mới</span>
           </div>
 
           <article class="featured-card">
             <div class="featured-top">
-              <div class="company-logo">SV</div>
+              <div class="company-logo" id="featuredJobLogo">SV</div>
               <div>
-                <h3>Trưởng phòng Kinh doanh</h3>
-                <p>TP. Hồ Chí Minh · Toàn thời gian</p>
+                <h3>
+                  <a class="featured-title-link" id="featuredJobTitle" href="#jobs">Trưởng phòng Kinh doanh</a>
+                </h3>
+                <p id="featuredJobMeta">TP. Hồ Chí Minh · Toàn thời gian</p>
               </div>
             </div>
 
-            <div class="tag-row">
+            <div class="tag-row" id="featuredJobTags">
               <span>B2B</span>
               <span>Quản lý đội nhóm</span>
               <span>5+ năm</span>
@@ -151,15 +154,23 @@
             <div class="featured-info">
               <div>
                 <small>Mức lương</small>
-                <strong>Thỏa thuận</strong>
+                <strong id="featuredJobSalary">Thỏa thuận</strong>
               </div>
               <div>
                 <small>Hồ sơ mục tiêu</small>
-                <strong>5–8 ứng viên</strong>
+                <strong id="featuredJobTarget">5–8 ứng viên</strong>
               </div>
             </div>
 
-            <button class="btn btn-primary btn-block" data-open-modal="requestModal">
+            <button
+              class="btn btn-primary btn-block"
+              id="featuredJobRequestButton"
+              type="button"
+              data-open-modal="requestModal"
+              data-position="Trưởng phòng Kinh doanh"
+              data-location="TP. Hồ Chí Minh"
+              data-salary="Thỏa thuận"
+            >
               Gửi yêu cầu tương tự
             </button>
           </article>
@@ -181,6 +192,7 @@
             </div>
           </div>
         </aside>
+        <!-- FEATURED_JOB_END -->
       </div>
     </section>
 
@@ -758,6 +770,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="/script.js?v=20260720-4"></script>
+  <script src="/script.js?v=20260720-5"></script>
 </body>
 </html>

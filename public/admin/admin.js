@@ -34,6 +34,10 @@ const elements = {
     editorTitle: document.getElementById("jobEditorTitle"),
     salary: document.getElementById("jobSalary"),
     logo: document.getElementById("jobLogo"),
+    featured: document.getElementById("jobFeatured"),
+    featuredTags: document.getElementById("jobFeaturedTags"),
+    targetCandidates: document.getElementById("jobTargetCandidates"),
+    featuredBadge: document.getElementById("jobFeaturedBadge"),
     published: document.getElementById("jobPublished"),
     submitButton: document.getElementById("jobSubmitButton"),
     cancelEditButton: document.getElementById("jobCancelEditButton"),
@@ -110,6 +114,12 @@ function bindEvents() {
   elements.jobs.form.addEventListener("submit", submitJobForm);
   elements.jobs.cancelEditButton.addEventListener("click", resetJobForm);
   elements.jobs.rows.addEventListener("click", handleJobTableClick);
+  elements.jobs.featured.addEventListener("change", () => {
+    if (elements.jobs.featured.checked) elements.jobs.published.checked = true;
+  });
+  elements.jobs.published.addEventListener("change", () => {
+    if (!elements.jobs.published.checked) elements.jobs.featured.checked = false;
+  });
 
   bindListEvents("requests", loadRequests);
   bindListEvents("candidates", loadCandidates);
@@ -210,6 +220,13 @@ async function submitJobForm(event) {
     additionalInfo: elements.jobs.additionalInfo.value.trim(),
     salary: elements.jobs.salary.value.trim(),
     logo: elements.jobs.logo.value.trim(),
+    featured: elements.jobs.featured.checked,
+    featuredTags: elements.jobs.featuredTags.value
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean),
+    targetCandidates: elements.jobs.targetCandidates.value.trim(),
+    featuredBadge: elements.jobs.featuredBadge.value.trim(),
     published: elements.jobs.published.checked,
   };
 
@@ -305,6 +322,12 @@ function startEditingJob(job) {
   elements.jobs.additionalInfo.value = job.additionalInfo || "";
   elements.jobs.salary.value = job.salary || "";
   elements.jobs.logo.value = job.logo || "";
+  elements.jobs.featured.checked = job.featured === true;
+  elements.jobs.featuredTags.value = Array.isArray(job.featuredTags)
+    ? job.featuredTags.join(", ")
+    : "";
+  elements.jobs.targetCandidates.value = job.targetCandidates || "";
+  elements.jobs.featuredBadge.value = job.featuredBadge || "Mới";
   elements.jobs.published.checked = job.published !== false;
   elements.jobs.submitButton.textContent = "Cập nhật tin";
   elements.jobs.editorTitle.textContent = "Chỉnh sửa tin tuyển dụng";
@@ -317,6 +340,8 @@ function startEditingJob(job) {
 function resetJobForm() {
   elements.jobs.form.reset();
   elements.jobs.id.value = "";
+  elements.jobs.featured.checked = false;
+  elements.jobs.featuredBadge.value = "Mới";
   elements.jobs.published.checked = true;
   elements.jobs.submitButton.textContent = "Đăng tin";
   elements.jobs.editorTitle.textContent = "Tạo tin tuyển dụng mới";
@@ -354,6 +379,9 @@ function createJobRow(job) {
     createCell([textElement("span", job.salary || "Thỏa thuận", "candidate-name")]),
     createCell([
       statusBadgeElement(job.published !== false ? "Đang hiển thị" : "Đang ẩn", job.published !== false),
+      ...(job.featured === true
+        ? [textElement("span", "★ Nổi bật đầu trang", "featured-reference")]
+        : []),
     ]),
     createCell([
       jobActionButton("Sửa", "edit", job.id, "edit-button"),

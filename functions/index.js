@@ -30,7 +30,9 @@ export async function onRequestGet(context) {
 
 function injectJobs(html, jobs) {
   const cards = jobs.map(renderJobCard).join("");
-  return html
+  const featuredJob = jobs.find((job) => job.featured === true) || jobs[0];
+
+  let nextHtml = html
     .replace(
       '<div class="job-grid" id="jobGrid" aria-live="polite"></div>',
       `<div class="job-grid" id="jobGrid" aria-live="polite">${cards}</div>`
@@ -39,6 +41,121 @@ function injectJobs(html, jobs) {
       '<p class="job-loading" id="jobLoading">Đang tải tin tuyển dụng...</p>',
       '<p class="job-loading hidden" id="jobLoading">Đang tải tin tuyển dụng...</p>'
     );
+
+  if (featuredJob) {
+    nextHtml = nextHtml.replace(
+      /<!-- FEATURED_JOB_START -->[\s\S]*?<!-- FEATURED_JOB_END -->/,
+      renderFeaturedPanel(featuredJob)
+    );
+  }
+
+  return nextHtml;
+}
+
+function renderFeaturedPanel(job) {
+  const tags = getFeaturedTags(job)
+    .map((tag) => `<span>${escapeHtml(tag)}</span>`)
+    .join("");
+  const jobUrl = `/jobs/${encodeURIComponent(job.id)}`;
+  const meta = [
+    job.location,
+    employmentTypeLabel(job.employmentType) || job.workHours,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  return `<!-- FEATURED_JOB_START -->
+        <aside class="hero-panel" id="featuredJobPanel">
+          <div class="panel-header">
+            <div>
+              <span class="status-dot"></span>
+              <span>Yêu cầu đang được quan tâm</span>
+            </div>
+            <span class="mini-badge" id="featuredJobBadge">${escapeHtml(job.featuredBadge || "Mới")}</span>
+          </div>
+
+          <article class="featured-card">
+            <div class="featured-top">
+              <div class="company-logo" id="featuredJobLogo">${escapeHtml(job.logo || initials(job.title))}</div>
+              <div>
+                <h3>
+                  <a class="featured-title-link" id="featuredJobTitle" href="${jobUrl}">${escapeHtml(job.title)}</a>
+                </h3>
+                <p id="featuredJobMeta">${escapeHtml(meta)}</p>
+              </div>
+            </div>
+
+            <div class="tag-row" id="featuredJobTags">${tags}</div>
+
+            <div class="featured-info">
+              <div>
+                <small>Mức lương</small>
+                <strong id="featuredJobSalary">${escapeHtml(job.salary || "Thỏa thuận")}</strong>
+              </div>
+              <div>
+                <small>Hồ sơ mục tiêu</small>
+                <strong id="featuredJobTarget">${escapeHtml(job.targetCandidates || "5–8 ứng viên")}</strong>
+              </div>
+            </div>
+
+            <button
+              class="btn btn-primary btn-block"
+              id="featuredJobRequestButton"
+              type="button"
+              data-open-modal="requestModal"
+              data-position="${escapeHtml(job.title)}"
+              data-location="${escapeHtml(job.location)}"
+              data-salary="${escapeHtml(job.salary || "")}"
+            >
+              Gửi yêu cầu tương tự
+            </button>
+          </article>
+
+          <div class="mini-cards">
+            <div class="mini-card">
+              <span class="mini-icon">✓</span>
+              <div>
+                <strong>Sàng lọc trước</strong>
+                <p>Chỉ giới thiệu hồ sơ phù hợp tiêu chí.</p>
+              </div>
+            </div>
+            <div class="mini-card">
+              <span class="mini-icon">↻</span>
+              <div>
+                <strong>Chính sách thay thế</strong>
+                <p>Áp dụng theo gói dịch vụ đã thống nhất.</p>
+              </div>
+            </div>
+          </div>
+        </aside>
+        <!-- FEATURED_JOB_END -->`;
+}
+
+function getFeaturedTags(job) {
+  const configured = Array.isArray(job.featuredTags)
+    ? job.featuredTags.filter(Boolean).slice(0, 3)
+    : [];
+
+  if (configured.length) return configured;
+
+  return [...new Set([
+    job.category,
+    job.experience,
+    employmentTypeLabel(job.employmentType),
+  ].filter(Boolean))].slice(0, 3);
+}
+
+function employmentTypeLabel(value) {
+  return {
+    FULL_TIME: "Toàn thời gian",
+    PART_TIME: "Bán thời gian",
+    CONTRACTOR: "Hợp đồng / cộng tác",
+    TEMPORARY: "Tạm thời",
+    INTERN: "Thực tập",
+    VOLUNTEER: "Tình nguyện",
+    PER_DIEM: "Theo ngày",
+    OTHER: "Khác",
+  }[value] || "";
 }
 
 function renderJobCard(job) {

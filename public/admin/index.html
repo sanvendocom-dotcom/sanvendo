@@ -6,8 +6,8 @@
   <meta name="robots" content="noindex,nofollow,noarchive">
   <meta name="referrer" content="no-referrer">
   <title>Quản trị tuyển dụng — Sanvendo</title>
-  <link rel="stylesheet" href="/admin/admin.css?v=20260720-4">
-  <script src="/admin/admin.js?v=20260720-4" defer></script>
+  <link rel="stylesheet" href="/admin/admin.css?v=20260720-5">
+  <script src="/admin/admin.js?v=20260720-5" defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -152,6 +152,35 @@
             <label class="form-field form-field-logo">
               <span>Ký hiệu thẻ</span>
               <input id="jobLogo" name="logo" type="text" maxlength="5" placeholder="KD">
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset class="job-form-section featured-job-section">
+          <legend>Khối tin nổi bật đầu trang</legend>
+          <div class="job-editor-grid">
+            <label class="publish-field featured-toggle form-field-full">
+              <input id="jobFeatured" name="featured" type="checkbox">
+              <span>
+                <strong>Đưa tin này lên khối “Yêu cầu đang được quan tâm”</strong>
+                <small>Mỗi thời điểm chỉ có một tin nổi bật. Chọn tin mới sẽ tự bỏ chọn tin cũ.</small>
+              </span>
+            </label>
+
+            <label class="form-field form-field-wide">
+              <span>Thẻ nổi bật</span>
+              <input id="jobFeaturedTags" name="featuredTags" type="text" maxlength="140" placeholder="Ví dụ: B2B, Quản lý đội nhóm, 5+ năm">
+              <small>Nhập tối đa 3 thẻ, cách nhau bằng dấu phẩy.</small>
+            </label>
+
+            <label class="form-field">
+              <span>Hồ sơ mục tiêu</span>
+              <input id="jobTargetCandidates" name="targetCandidates" type="text" maxlength="80" placeholder="Ví dụ: 5–8 ứng viên">
+            </label>
+
+            <label class="form-field">
+              <span>Nhãn góc phải</span>
+              <input id="jobFeaturedBadge" name="featuredBadge" type="text" maxlength="30" placeholder="Ví dụ: Mới">
             </label>
           </div>
         </fieldset>

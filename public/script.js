@@ -39,6 +39,22 @@ function openModal(modalId, trigger) {
     clearRequestError();
     requestForm?.classList.remove("hidden");
     requestSuccess?.classList.add("hidden");
+
+    const requestPrefill = {
+      position: trigger?.dataset?.position,
+      location: trigger?.dataset?.location,
+      salary: trigger?.dataset?.salary,
+    };
+
+    for (const [name, value] of Object.entries(requestPrefill)) {
+      const input = requestForm?.elements?.namedItem(name);
+      if (
+        value &&
+        (input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement)
+      ) {
+        input.value = value;
+      }
+    }
   }
 
   if (modalId === "candidateModal") {
@@ -97,6 +113,29 @@ const jobLoading = document.getElementById("jobLoading");
 const emptyState = document.getElementById("emptyState");
 let jobs = [];
 let jobCards = [];
+
+const featuredJobElements = {
+  panel: document.getElementById("featuredJobPanel"),
+  badge: document.getElementById("featuredJobBadge"),
+  logo: document.getElementById("featuredJobLogo"),
+  title: document.getElementById("featuredJobTitle"),
+  meta: document.getElementById("featuredJobMeta"),
+  tags: document.getElementById("featuredJobTags"),
+  salary: document.getElementById("featuredJobSalary"),
+  target: document.getElementById("featuredJobTarget"),
+  requestButton: document.getElementById("featuredJobRequestButton"),
+};
+
+const employmentTypeLabels = {
+  FULL_TIME: "Toàn thời gian",
+  PART_TIME: "Bán thời gian",
+  CONTRACTOR: "Hợp đồng / cộng tác",
+  TEMPORARY: "Tạm thời",
+  INTERN: "Thực tập",
+  VOLUNTEER: "Tình nguyện",
+  PER_DIEM: "Theo ngày",
+  OTHER: "Khác",
+};
 
 const jobDetailElements = {
   logo: document.getElementById("jobDetailLogo"),
@@ -173,6 +212,74 @@ function renderJobs() {
   }
 
   jobCards = [...jobGrid.querySelectorAll(".job-card")];
+  renderFeaturedJob();
+}
+
+function renderFeaturedJob() {
+  const job = jobs.find((item) => item.featured === true) || jobs[0];
+  if (!job || !featuredJobElements.panel) return;
+
+  if (featuredJobElements.badge) {
+    featuredJobElements.badge.textContent = job.featuredBadge || "Mới";
+  }
+
+  if (featuredJobElements.logo) {
+    featuredJobElements.logo.textContent = job.logo || createInitials(job.title);
+  }
+
+  if (featuredJobElements.title) {
+    featuredJobElements.title.textContent = job.title || "Vị trí tuyển dụng";
+    featuredJobElements.title.href = `/jobs/${encodeURIComponent(job.id || "")}`;
+  }
+
+  if (featuredJobElements.meta) {
+    featuredJobElements.meta.textContent = [
+      job.location,
+      employmentTypeLabels[job.employmentType] || job.workHours || "",
+    ]
+      .filter(Boolean)
+      .join(" · ");
+  }
+
+  if (featuredJobElements.tags) {
+    const tags = getFeaturedTags(job);
+    featuredJobElements.tags.replaceChildren(
+      ...tags.map((tag) => {
+        const item = document.createElement("span");
+        item.textContent = tag;
+        return item;
+      })
+    );
+  }
+
+  if (featuredJobElements.salary) {
+    featuredJobElements.salary.textContent = job.salary || "Thỏa thuận";
+  }
+
+  if (featuredJobElements.target) {
+    featuredJobElements.target.textContent =
+      job.targetCandidates || "5–8 ứng viên";
+  }
+
+  if (featuredJobElements.requestButton) {
+    featuredJobElements.requestButton.dataset.position = job.title || "";
+    featuredJobElements.requestButton.dataset.location = job.location || "";
+    featuredJobElements.requestButton.dataset.salary = job.salary || "";
+  }
+}
+
+function getFeaturedTags(job) {
+  const configured = Array.isArray(job.featuredTags)
+    ? job.featuredTags.filter(Boolean).slice(0, 3)
+    : [];
+
+  if (configured.length) return configured;
+
+  return [...new Set([
+    job.category,
+    job.experience,
+    employmentTypeLabels[job.employmentType],
+  ].filter(Boolean))].slice(0, 3);
 }
 
 function createJobCard(job) {

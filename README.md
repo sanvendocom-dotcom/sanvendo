@@ -224,3 +224,15 @@ SITE_ORIGIN = https://ten-mien-moi.example
 3. Mở một URL `https://sanvendo.com/jobs/<ma-tin>`.
 4. Gửi sitemap trong Google Search Console và Bing Webmaster Tools.
 5. Kiểm tra một tin đầy đủ bằng Google Rich Results Test.
+
+
+## Cập nhật khối tin nổi bật đầu trang
+
+Trong `/admin`, mở hoặc tạo một tin tuyển dụng rồi dùng nhóm **Khối tin nổi bật đầu trang**:
+
+1. Bật **Đưa tin này lên khối “Yêu cầu đang được quan tâm”**.
+2. Nhập tối đa ba thẻ, cách nhau bằng dấu phẩy.
+3. Nhập số hồ sơ mục tiêu và nhãn góc phải.
+4. Bấm **Đăng tin** hoặc **Cập nhật tin**.
+
+Mỗi thời điểm chỉ có một tin nổi bật. Khi chọn tin mới, hệ thống tự bỏ trạng thái nổi bật của tin cũ. Tiêu đề, địa điểm, loại hình việc làm, mức lương và nút gửi yêu cầu tương tự trên trang chủ sẽ tự cập nhật từ dữ liệu `/admin`.

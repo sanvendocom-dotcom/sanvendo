@@ -838,3 +838,40 @@ textarea {
     width: 100%;
   }
 }
+
+
+.featured-job-section {
+  background:
+    linear-gradient(135deg, rgba(8, 127, 77, 0.08), rgba(255, 255, 255, 0.7)),
+    var(--surface);
+}
+
+.featured-toggle {
+  min-height: 70px;
+  padding-block: 12px;
+}
+
+.featured-toggle > span {
+  display: grid;
+  gap: 3px;
+}
+
+.featured-toggle strong,
+.featured-toggle small {
+  display: block;
+}
+
+.featured-toggle small {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.featured-reference {
+  display: block;
+  margin-top: 8px;
+  color: #986500;
+  font-size: 11px;
+  font-weight: 900;
+}

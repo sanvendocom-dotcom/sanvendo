@@ -431,6 +431,18 @@ img {
   font-size: 18px;
 }
 
+.featured-title-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.featured-title-link:hover {
+  color: var(--brand-dark);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
 .featured-top p {
   color: var(--muted);
   font-size: 13px;
