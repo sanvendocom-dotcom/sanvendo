@@ -3,6 +3,7 @@ import { securityHeaders } from "../../_lib/access.js";
 const DEFAULT_LIMIT = 40;
 const MAX_LIMIT = 100;
 const MAX_SEARCH_OBJECTS = 2000;
+const CANDIDATE_PREFIX = "cv/";
 
 export async function onRequestGet(context) {
   const { env, request } = context;
@@ -40,22 +41,55 @@ export async function onRequestGet(context) {
   }
 }
 
-export function onRequest() {
-  return new Response(
-    JSON.stringify({ success: false, message: "Method not allowed." }),
-    {
-      status: 405,
-      headers: {
-        ...securityHeaders(),
-        Allow: "GET",
-      },
+export async function onRequestDelete(context) {
+  const { env, request } = context;
+
+  if (!env.CV_BUCKET) {
+    return json(
+      { success: false, message: "R2 chưa được liên kết với CV_BUCKET." },
+      500
+    );
+  }
+
+  if (!isSameOriginRequest(request)) {
+    return json({ success: false, message: "Nguồn cập nhật không được phép." }, 403);
+  }
+
+  try {
+    const key = cleanObjectKey(new URL(request.url).searchParams.get("key"), CANDIDATE_PREFIX);
+    if (!key) {
+      return json({ success: false, message: "Mã hồ sơ cần xóa không hợp lệ." }, 400);
     }
-  );
+
+    const existing = await env.CV_BUCKET.head(key);
+    if (!existing) {
+      return json({ success: false, message: "Không tìm thấy hồ sơ ứng viên." }, 404);
+    }
+
+    await env.CV_BUCKET.delete(key);
+    return json({ success: true, message: "Đã xóa hồ sơ ứng viên và CV đính kèm." });
+  } catch (error) {
+    console.error("Delete candidate error", error);
+    return json(
+      { success: false, message: "Không thể xóa hồ sơ ứng viên. Vui lòng thử lại." },
+      500
+    );
+  }
+}
+
+export function onRequestOptions() {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      ...securityHeaders(),
+      Allow: "GET, DELETE, OPTIONS",
+    },
+  });
 }
 
 async function listCandidates(bucket, options) {
   const list = await bucket.list({
-    prefix: "cv/",
+    prefix: CANDIDATE_PREFIX,
     cursor: options.cursor || undefined,
     limit: options.limit,
     include: ["customMetadata", "httpMetadata"],
@@ -80,7 +114,7 @@ async function searchCandidates(bucket, query, limit) {
 
   do {
     const list = await bucket.list({
-      prefix: "cv/",
+      prefix: CANDIDATE_PREFIX,
       cursor,
       limit: 100,
       include: ["customMetadata", "httpMetadata"],
@@ -176,6 +210,24 @@ function clampLimit(value) {
   const parsed = Number.parseInt(value || "", 10);
   if (!Number.isFinite(parsed)) return DEFAULT_LIMIT;
   return Math.min(Math.max(parsed, 10), MAX_LIMIT);
+}
+
+function cleanObjectKey(value, prefix) {
+  const key = String(value || "").trim();
+  if (!key.startsWith(prefix) || key.length <= prefix.length || key.length > 1024) return "";
+  if (/[\u0000-\u001F\u007F]/.test(key)) return "";
+  return key;
+}
+
+function isSameOriginRequest(request) {
+  const origin = request.headers.get("Origin");
+  if (!origin) return true;
+
+  try {
+    return new URL(origin).origin === new URL(request.url).origin;
+  } catch {
+    return false;
+  }
 }
 
 function filenameFromKey(key) {

@@ -9,6 +9,8 @@ export const JOB_CATEGORIES = [
   "Kỹ thuật",
   "Logistics",
   "Chăm sóc khách hàng",
+  "Lao động phổ thông",
+  "Bán lẻ & Dịch vụ",
 ];
 
 const DEFAULT_CREATED_AT = "2026-07-20T00:00:00.000Z";

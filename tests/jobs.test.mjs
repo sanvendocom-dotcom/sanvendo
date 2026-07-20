@@ -91,3 +91,15 @@ test("tin đang ẩn không được đặt làm tin nổi bật", () => {
 
   assert.equal(job.featured, false);
 });
+
+test("chấp nhận hai nhóm ngành nghề mới", () => {
+  const factory = (category) => cleanJobInput({
+    title: "Vị trí thử nghiệm",
+    category,
+    location: "TP. Hồ Chí Minh",
+    salary: "Thỏa thuận",
+  });
+
+  assert.equal(factory("Lao động phổ thông").category, "Lao động phổ thông");
+  assert.equal(factory("Bán lẻ & Dịch vụ").category, "Bán lẻ & Dịch vụ");
+});

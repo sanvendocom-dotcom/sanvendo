@@ -236,3 +236,20 @@ Trong `/admin`, mở hoặc tạo một tin tuyển dụng rồi dùng nhóm **K
 4. Bấm **Đăng tin** hoặc **Cập nhật tin**.
 
 Mỗi thời điểm chỉ có một tin nổi bật. Khi chọn tin mới, hệ thống tự bỏ trạng thái nổi bật của tin cũ. Tiêu đề, địa điểm, loại hình việc làm, mức lương và nút gửi yêu cầu tương tự trên trang chủ sẽ tự cập nhật từ dữ liệu `/admin`.
+
+## Cập nhật 10 ngành nghề và chức năng xóa dữ liệu
+
+Danh mục ngành nghề trên trang chủ và biểu mẫu quản trị gồm:
+
+1. Kinh doanh & Bán hàng
+2. Marketing & Truyền thông
+3. Kế toán & Tài chính
+4. Hành chính & Nhân sự
+5. Công nghệ thông tin
+6. Sản xuất, Kỹ thuật & QA/QC
+7. Kho vận & Chuỗi cung ứng
+8. Chăm sóc khách hàng
+9. Lao động phổ thông & Vận hành
+10. Bán lẻ, Nhà hàng & Dịch vụ
+
+Trong `/admin`, bảng **Yêu cầu tuyển dụng** và **Hồ sơ ứng viên** có thêm nút xóa. Hệ thống yêu cầu xác nhận trước khi xóa. Xóa hồ sơ ứng viên sẽ xóa luôn object CV tương ứng trong R2 và không thể khôi phục.

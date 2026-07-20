@@ -144,6 +144,10 @@ function bindListEvents(type, loader) {
   group.loadMoreButton.addEventListener("click", () => {
     loader({ reset: false });
   });
+
+  group.rows.addEventListener("click", (event) => {
+    handleListTableClick(event, type, loader);
+  });
 }
 
 async function loadIdentity() {
@@ -530,7 +534,11 @@ function createRequestRow(request) {
       textElement("span", formatRelativeTime(request.submittedAt), "secondary-text"),
       labeledText("Cần nhân sự", request.deadline || "Chưa cung cấp"),
     ]),
-    createCell([descriptionElement(request.description || "Không có mô tả thêm")])
+    createCell([descriptionElement(request.description || "Không có mô tả thêm")]),
+    createCell(
+      [listDeleteButton("requests", request.key, "Xóa yêu cầu")],
+      "action-cell"
+    )
   );
 
   return row;
@@ -580,10 +588,72 @@ function createCandidateRow(candidate) {
             textElement("span", "Chưa gửi CV", "file-name no-cv"),
             textElement("span", "Đã nhận thông tin liên hệ", "secondary-text"),
           ]
+    ),
+    createCell(
+      [listDeleteButton("candidates", candidate.key, "Xóa hồ sơ")],
+      "action-cell"
     )
   );
 
   return row;
+}
+
+async function handleListTableClick(event, type, loader) {
+  const button = event.target.closest("button[data-list-action='delete']");
+  if (!button || button.dataset.listType !== type) return;
+
+  const group = elements[type];
+  const listState = state[type];
+  const key = button.dataset.itemKey || "";
+  const item = listState.items.find((entry) => entry.key === key);
+  if (!item) return;
+
+  const isRequest = type === "requests";
+  const label = isRequest
+    ? item.company || item.position || "yêu cầu doanh nghiệp này"
+    : item.name || "hồ sơ ứng viên này";
+  const warning = isRequest
+    ? `Xóa yêu cầu của “${label}”? Thao tác này không thể hoàn tác.`
+    : `Xóa hồ sơ của “${label}”? CV đính kèm cũng sẽ bị xóa và không thể khôi phục.`;
+
+  if (!window.confirm(warning)) return;
+
+  button.disabled = true;
+  hideError(group);
+
+  try {
+    const endpoint = isRequest ? "requests" : "candidates";
+    const response = await fetch(
+      `/admin/api/${endpoint}?key=${encodeURIComponent(key)}`,
+      {
+        method: "DELETE",
+        headers: { Accept: "application/json" },
+      }
+    );
+    const result = await parseJson(response);
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Không thể xóa dữ liệu.");
+    }
+
+    await loader({ reset: true });
+    showListStatus(group, result.message || "Đã xóa dữ liệu.", "success");
+  } catch (error) {
+    showError(group, error.message);
+  } finally {
+    button.disabled = false;
+  }
+}
+
+function listDeleteButton(type, key, label) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "table-action delete-button";
+  button.dataset.listAction = "delete";
+  button.dataset.listType = type;
+  button.dataset.itemKey = key;
+  button.textContent = label;
+  return button;
 }
 
 function updateListFooter(group, listState, noun) {
@@ -740,14 +810,20 @@ function setLoading(group, isLoading) {
   group.clearSearchButton.disabled = isLoading;
 }
 
-function showError(group, message) {
+function showListStatus(group, message, type = "error") {
   group.statusMessage.textContent = message || "Đã xảy ra lỗi.";
-  group.statusMessage.classList.remove("hidden");
+  group.statusMessage.classList.remove("hidden", "success");
+  if (type === "success") group.statusMessage.classList.add("success");
+}
+
+function showError(group, message) {
+  showListStatus(group, message, "error");
 }
 
 function hideError(group) {
   group.statusMessage.textContent = "";
   group.statusMessage.classList.add("hidden");
+  group.statusMessage.classList.remove("success");
 }
 
 function mergeUnique(current, incoming, dateField) {
