@@ -8,7 +8,7 @@
     content="Sanvendo hỗ trợ doanh nghiệp tìm kiếm, sàng lọc và tuyển dụng nhân sự theo yêu cầu."
   />
   <title>Sanvendo — Tuyển dụng & Headhunting theo yêu cầu</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=20260720-3" />
 </head>
 
 <body>
@@ -476,6 +476,69 @@
     </div>
   </footer>
 
+  <div class="modal" id="jobDetailModal" aria-hidden="true">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-dialog job-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="jobDetailTitle">
+      <button class="modal-close" data-close-modal aria-label="Đóng">×</button>
+
+      <div class="job-detail-heading">
+        <span class="job-detail-logo" id="jobDetailLogo">SV</span>
+        <div>
+          <span class="eyebrow" id="jobDetailCategory">Tin tuyển dụng</span>
+          <h2 id="jobDetailTitle">Chi tiết công việc</h2>
+          <p class="job-detail-meta" id="jobDetailMeta"></p>
+        </div>
+      </div>
+
+      <div class="job-detail-highlights">
+        <div>
+          <small>Mức lương</small>
+          <strong id="jobDetailSalary">Thỏa thuận</strong>
+        </div>
+        <div>
+          <small>Kinh nghiệm</small>
+          <strong id="jobDetailExperience">Không yêu cầu</strong>
+        </div>
+        <div>
+          <small>Thời gian làm việc</small>
+          <strong id="jobDetailWorkHours">Trao đổi khi phỏng vấn</strong>
+        </div>
+      </div>
+
+      <p class="job-detail-summary hidden" id="jobDetailSummary"></p>
+
+      <div class="job-detail-content">
+        <section class="job-detail-section hidden" id="jobResponsibilitiesSection">
+          <h3>Mô tả công việc</h3>
+          <div id="jobDetailResponsibilities"></div>
+        </section>
+        <section class="job-detail-section hidden" id="jobRequirementsSection">
+          <h3>Yêu cầu ứng viên</h3>
+          <div id="jobDetailRequirements"></div>
+        </section>
+        <section class="job-detail-section hidden" id="jobBenefitsSection">
+          <h3>Quyền lợi</h3>
+          <div id="jobDetailBenefits"></div>
+        </section>
+        <section class="job-detail-section hidden" id="jobAdditionalInfoSection">
+          <h3>Thông tin bổ sung</h3>
+          <div id="jobDetailAdditionalInfo"></div>
+        </section>
+      </div>
+
+      <div class="job-detail-empty hidden" id="jobDetailEmpty">
+        Nội dung chi tiết đang được cập nhật. Bạn vẫn có thể gửi đơn để Sanvendo liên hệ thêm.
+      </div>
+
+      <div class="job-detail-actions">
+        <button class="btn btn-primary" id="jobDetailApplyButton" type="button" data-open-modal="candidateModal">
+          Ứng tuyển vị trí này
+        </button>
+        <button class="btn btn-ghost" type="button" data-close-modal>Đóng</button>
+      </div>
+    </div>
+  </div>
+
   <div class="modal" id="requestModal" aria-hidden="true">
     <div class="modal-backdrop" data-close-modal></div>
     <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="requestModalTitle">
@@ -662,6 +725,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="script.js"></script>
+  <script src="script.js?v=20260720-3"></script>
 </body>
 </html>

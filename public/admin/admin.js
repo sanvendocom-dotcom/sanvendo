@@ -22,6 +22,13 @@ const elements = {
     category: document.getElementById("jobCategory"),
     location: document.getElementById("jobLocation"),
     experience: document.getElementById("jobExperience"),
+    workHours: document.getElementById("jobWorkHours"),
+    summary: document.getElementById("jobSummary"),
+    responsibilities: document.getElementById("jobResponsibilities"),
+    requirements: document.getElementById("jobRequirements"),
+    benefits: document.getElementById("jobBenefits"),
+    additionalInfo: document.getElementById("jobAdditionalInfo"),
+    editorTitle: document.getElementById("jobEditorTitle"),
     salary: document.getElementById("jobSalary"),
     logo: document.getElementById("jobLogo"),
     published: document.getElementById("jobPublished"),
@@ -189,6 +196,12 @@ async function submitJobForm(event) {
     category: elements.jobs.category.value,
     location: elements.jobs.location.value.trim(),
     experience: elements.jobs.experience.value.trim(),
+    workHours: elements.jobs.workHours.value.trim(),
+    summary: elements.jobs.summary.value.trim(),
+    responsibilities: elements.jobs.responsibilities.value.trim(),
+    requirements: elements.jobs.requirements.value.trim(),
+    benefits: elements.jobs.benefits.value.trim(),
+    additionalInfo: elements.jobs.additionalInfo.value.trim(),
     salary: elements.jobs.salary.value.trim(),
     logo: elements.jobs.logo.value.trim(),
     published: elements.jobs.published.checked,
@@ -275,10 +288,17 @@ function startEditingJob(job) {
   elements.jobs.category.value = job.category || "";
   elements.jobs.location.value = job.location || "";
   elements.jobs.experience.value = job.experience || "";
+  elements.jobs.workHours.value = job.workHours || "";
+  elements.jobs.summary.value = job.summary || "";
+  elements.jobs.responsibilities.value = job.responsibilities || "";
+  elements.jobs.requirements.value = job.requirements || "";
+  elements.jobs.benefits.value = job.benefits || "";
+  elements.jobs.additionalInfo.value = job.additionalInfo || "";
   elements.jobs.salary.value = job.salary || "";
   elements.jobs.logo.value = job.logo || "";
   elements.jobs.published.checked = job.published !== false;
   elements.jobs.submitButton.textContent = "Cập nhật tin";
+  elements.jobs.editorTitle.textContent = "Chỉnh sửa tin tuyển dụng";
   elements.jobs.cancelEditButton.classList.remove("hidden");
   hideJobStatus();
   elements.jobs.form.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -290,6 +310,7 @@ function resetJobForm() {
   elements.jobs.id.value = "";
   elements.jobs.published.checked = true;
   elements.jobs.submitButton.textContent = "Đăng tin";
+  elements.jobs.editorTitle.textContent = "Tạo tin tuyển dụng mới";
   elements.jobs.cancelEditButton.classList.add("hidden");
 }
 
@@ -313,6 +334,7 @@ function createJobRow(job) {
       textElement("p", job.title || "Chưa có tên vị trí", "candidate-name"),
       textElement("span", job.logo || "Không có ký hiệu", "reference"),
       textElement("span", `Cập nhật: ${formatDate(job.updatedAt)}`, "secondary-text"),
+      textElement("span", job.summary || "Chưa có nội dung giới thiệu chi tiết", "job-summary-preview"),
     ]),
     createCell([badgeElement(job.category || "Khác")]),
     createCell([

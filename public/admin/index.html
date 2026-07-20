@@ -6,8 +6,8 @@
   <meta name="robots" content="noindex,nofollow,noarchive">
   <meta name="referrer" content="no-referrer">
   <title>Quản trị tuyển dụng — Sanvendo</title>
-  <link rel="stylesheet" href="/admin/admin.css">
-  <script src="/admin/admin.js" defer></script>
+  <link rel="stylesheet" href="/admin/admin.css?v=20260720-3">
+  <script src="/admin/admin.js?v=20260720-3" defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -75,54 +75,105 @@
       <form class="job-editor" id="jobForm">
         <input id="jobId" name="id" type="hidden">
 
-        <label class="form-field form-field-wide">
-          <span>Tên vị trí *</span>
-          <input id="jobTitle" name="title" type="text" maxlength="160" required placeholder="Ví dụ: Nhân viên kinh doanh B2B">
-        </label>
+        <div class="job-form-intro">
+          <div>
+            <strong id="jobEditorTitle">Tạo tin tuyển dụng mới</strong>
+            <p>Điền thông tin ngắn để hiển thị trên thẻ việc làm và nội dung đầy đủ cho trang chi tiết.</p>
+          </div>
+          <span class="editor-note">Các ô có dấu * là bắt buộc</span>
+        </div>
 
-        <label class="form-field">
-          <span>Ngành nghề *</span>
-          <select id="jobCategory" name="category" required>
-            <option value="">Chọn ngành nghề</option>
-            <option value="Kinh doanh">Kinh doanh &amp; Bán hàng</option>
-            <option value="Marketing">Marketing &amp; Truyền thông</option>
-            <option value="Kế toán">Kế toán &amp; Tài chính</option>
-            <option value="Nhân sự">Hành chính &amp; Nhân sự</option>
-            <option value="Công nghệ">Công nghệ thông tin</option>
-            <option value="Kỹ thuật">Kỹ thuật &amp; Sản xuất</option>
-            <option value="Logistics">Kho vận &amp; Chuỗi cung ứng</option>
-            <option value="Chăm sóc khách hàng">Chăm sóc khách hàng</option>
-          </select>
-        </label>
+        <fieldset class="job-form-section">
+          <legend>Thông tin chính</legend>
+          <div class="job-editor-grid">
+            <label class="form-field form-field-wide">
+              <span>Tên vị trí *</span>
+              <input id="jobTitle" name="title" type="text" maxlength="160" required placeholder="Ví dụ: Nhân viên kinh doanh B2B">
+            </label>
 
-        <label class="form-field">
-          <span>Địa điểm *</span>
-          <input id="jobLocation" name="location" type="text" maxlength="120" required placeholder="Ví dụ: TP. Hồ Chí Minh">
-        </label>
+            <label class="form-field">
+              <span>Ngành nghề *</span>
+              <select id="jobCategory" name="category" required>
+                <option value="">Chọn ngành nghề</option>
+                <option value="Kinh doanh">Kinh doanh &amp; Bán hàng</option>
+                <option value="Marketing">Marketing &amp; Truyền thông</option>
+                <option value="Kế toán">Kế toán &amp; Tài chính</option>
+                <option value="Nhân sự">Hành chính &amp; Nhân sự</option>
+                <option value="Công nghệ">Công nghệ thông tin</option>
+                <option value="Kỹ thuật">Kỹ thuật &amp; Sản xuất</option>
+                <option value="Logistics">Kho vận &amp; Chuỗi cung ứng</option>
+                <option value="Chăm sóc khách hàng">Chăm sóc khách hàng</option>
+              </select>
+            </label>
 
-        <label class="form-field">
-          <span>Kinh nghiệm / yêu cầu ngắn</span>
-          <input id="jobExperience" name="experience" type="text" maxlength="160" placeholder="Ví dụ: 1–3 năm kinh nghiệm">
-        </label>
+            <label class="form-field">
+              <span>Địa điểm *</span>
+              <input id="jobLocation" name="location" type="text" maxlength="120" required placeholder="Ví dụ: TP. Hồ Chí Minh">
+            </label>
 
-        <label class="form-field">
-          <span>Mức lương *</span>
-          <input id="jobSalary" name="salary" type="text" maxlength="120" required placeholder="Ví dụ: 15–25 triệu hoặc Thỏa thuận">
-        </label>
+            <label class="form-field">
+              <span>Kinh nghiệm / yêu cầu ngắn</span>
+              <input id="jobExperience" name="experience" type="text" maxlength="160" placeholder="Ví dụ: 1–3 năm kinh nghiệm">
+            </label>
 
-        <label class="form-field form-field-logo">
-          <span>Ký hiệu</span>
-          <input id="jobLogo" name="logo" type="text" maxlength="5" placeholder="KD">
-        </label>
+            <label class="form-field">
+              <span>Mức lương *</span>
+              <input id="jobSalary" name="salary" type="text" maxlength="120" required placeholder="Ví dụ: 15–25 triệu hoặc Thỏa thuận">
+            </label>
 
-        <label class="publish-field">
-          <input id="jobPublished" name="published" type="checkbox" checked>
-          <span>Hiển thị tin này trên trang chủ</span>
-        </label>
+            <label class="form-field">
+              <span>Thời gian làm việc</span>
+              <input id="jobWorkHours" name="workHours" type="text" maxlength="160" placeholder="Ví dụ: Thứ 2–Thứ 6, 08:00–17:00">
+            </label>
 
-        <div class="editor-actions form-field-wide">
-          <button class="button button-primary" id="jobSubmitButton" type="submit">Đăng tin</button>
-          <button class="button button-secondary hidden" id="jobCancelEditButton" type="button">Hủy sửa</button>
+            <label class="form-field form-field-logo">
+              <span>Ký hiệu thẻ</span>
+              <input id="jobLogo" name="logo" type="text" maxlength="5" placeholder="KD">
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset class="job-form-section job-detail-section">
+          <legend>Nội dung chi tiết công việc</legend>
+          <div class="job-editor-grid detail-grid">
+            <label class="form-field form-field-full">
+              <span>Giới thiệu ngắn</span>
+              <textarea id="jobSummary" name="summary" rows="3" maxlength="1200" placeholder="Tóm tắt vai trò, phòng ban hoặc mục tiêu tuyển dụng. Nội dung này hiện trên thẻ việc làm."></textarea>
+              <small>Tối đa 1.200 ký tự.</small>
+            </label>
+
+            <label class="form-field">
+              <span>Mô tả công việc</span>
+              <textarea id="jobResponsibilities" name="responsibilities" rows="7" maxlength="5000" placeholder="Mỗi nhiệm vụ nên viết trên một dòng để trang chi tiết tự hiển thị dạng danh sách."></textarea>
+            </label>
+
+            <label class="form-field">
+              <span>Yêu cầu ứng viên</span>
+              <textarea id="jobRequirements" name="requirements" rows="7" maxlength="5000" placeholder="Ví dụ: Tốt nghiệp cao đẳng trở lên&#10;Có kỹ năng giao tiếp và xử lý tình huống"></textarea>
+            </label>
+
+            <label class="form-field">
+              <span>Quyền lợi</span>
+              <textarea id="jobBenefits" name="benefits" rows="7" maxlength="5000" placeholder="Ví dụ: Thưởng hiệu suất&#10;Đóng BHXH đầy đủ&#10;Đào tạo và lộ trình thăng tiến"></textarea>
+            </label>
+
+            <label class="form-field">
+              <span>Thông tin bổ sung</span>
+              <textarea id="jobAdditionalInfo" name="additionalInfo" rows="7" maxlength="3000" placeholder="Hạn nộp, hình thức làm việc, số lượng tuyển hoặc lưu ý khác."></textarea>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="job-editor-footer">
+          <label class="publish-field">
+            <input id="jobPublished" name="published" type="checkbox" checked>
+            <span>Hiển thị tin này trên trang chủ</span>
+          </label>
+
+          <div class="editor-actions">
+            <button class="button button-primary" id="jobSubmitButton" type="submit">Đăng tin</button>
+            <button class="button button-secondary hidden" id="jobCancelEditButton" type="button">Hủy sửa</button>
+          </div>
         </div>
       </form>
 

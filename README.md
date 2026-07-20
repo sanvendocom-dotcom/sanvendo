@@ -136,3 +136,11 @@ Sau khi cập nhật mã, triển khai lại bản Production rồi gửi một 
 - Khi người dùng không chọn file, JavaScript xóa phần file rỗng khỏi `FormData`.
 - API xem file có tên rỗng hoặc dung lượng 0 là không có CV và vẫn lưu thông tin ứng viên vào R2.
 - Trang quản trị hiển thị hồ sơ đó với trạng thái `Chưa gửi CV`.
+
+
+## Bản nâng cấp nội dung chi tiết việc làm
+
+- Biểu mẫu quản trị được chia thành nhóm thông tin chính và nội dung chi tiết, tự xuống cột trên màn hình nhỏ.
+- Mỗi tin có thêm: thời gian làm việc, giới thiệu ngắn, mô tả công việc, yêu cầu ứng viên, quyền lợi và thông tin bổ sung.
+- Trang chủ có nút `Xem chi tiết`, mở cửa sổ đầy đủ và cho phép ứng tuyển đúng vị trí.
+- Tin cũ vẫn hoạt động; các trường mới có thể để trống và bổ sung dần trong `/admin`.

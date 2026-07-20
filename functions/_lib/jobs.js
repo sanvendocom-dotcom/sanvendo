@@ -155,6 +155,12 @@ export function cleanJobInput(value) {
     category: JOB_CATEGORIES.includes(category) ? category : "",
     location: cleanText(source.location, 120),
     experience: cleanText(source.experience, 160),
+    workHours: cleanText(source.workHours, 160),
+    summary: cleanMultilineText(source.summary, 1200),
+    responsibilities: cleanMultilineText(source.responsibilities, 5000),
+    requirements: cleanMultilineText(source.requirements, 5000),
+    benefits: cleanMultilineText(source.benefits, 5000),
+    additionalInfo: cleanMultilineText(source.additionalInfo, 3000),
     salary: cleanText(source.salary, 120),
     logo: cleanLogo(source.logo),
     published: source.published !== false,
@@ -205,6 +211,18 @@ function cleanText(value, maxLength) {
   return String(value || "")
     .replace(/[\u0000-\u001F\u007F]/g, " ")
     .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, maxLength);
+}
+
+function cleanMultilineText(value, maxLength) {
+  return String(value || "")
+    .replace(/\r\n?/g, "\n")
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, " ")
+    .split("\n")
+    .map((line) => line.replace(/[\t ]+/g, " ").trim())
+    .filter((line, index, lines) => line || (index > 0 && lines[index - 1]))
+    .join("\n")
     .trim()
     .slice(0, maxLength);
 }

@@ -28,6 +28,13 @@ function openModal(modalId, trigger) {
   const modal = document.getElementById(modalId);
   if (!modal) return;
 
+  document.querySelectorAll(".modal.active").forEach((activeModal) => {
+    if (activeModal !== modal) {
+      activeModal.classList.remove("active");
+      activeModal.setAttribute("aria-hidden", "true");
+    }
+  });
+
   if (modalId === "requestModal") {
     clearRequestError();
     requestForm?.classList.remove("hidden");
@@ -54,6 +61,12 @@ function openModal(modalId, trigger) {
 }
 
 document.addEventListener("click", (event) => {
+  const detailButton = event.target.closest("[data-job-details]");
+  if (detailButton) {
+    openJobDetails(detailButton.dataset.jobDetails);
+    return;
+  }
+
   const openButton = event.target.closest("[data-open-modal]");
   if (openButton) {
     openModal(openButton.dataset.openModal, openButton);
@@ -83,6 +96,27 @@ const jobLoading = document.getElementById("jobLoading");
 const emptyState = document.getElementById("emptyState");
 let jobs = [];
 let jobCards = [];
+
+const jobDetailElements = {
+  logo: document.getElementById("jobDetailLogo"),
+  category: document.getElementById("jobDetailCategory"),
+  title: document.getElementById("jobDetailTitle"),
+  meta: document.getElementById("jobDetailMeta"),
+  salary: document.getElementById("jobDetailSalary"),
+  experience: document.getElementById("jobDetailExperience"),
+  workHours: document.getElementById("jobDetailWorkHours"),
+  summary: document.getElementById("jobDetailSummary"),
+  responsibilities: document.getElementById("jobDetailResponsibilities"),
+  requirements: document.getElementById("jobDetailRequirements"),
+  benefits: document.getElementById("jobDetailBenefits"),
+  additionalInfo: document.getElementById("jobDetailAdditionalInfo"),
+  responsibilitiesSection: document.getElementById("jobResponsibilitiesSection"),
+  requirementsSection: document.getElementById("jobRequirementsSection"),
+  benefitsSection: document.getElementById("jobBenefitsSection"),
+  additionalInfoSection: document.getElementById("jobAdditionalInfoSection"),
+  empty: document.getElementById("jobDetailEmpty"),
+  applyButton: document.getElementById("jobDetailApplyButton"),
+};
 
 function normalize(text) {
   return (text || "")
@@ -146,6 +180,7 @@ function createJobCard(job) {
   article.dataset.title = job.title || "";
   article.dataset.category = job.category || "";
   article.dataset.location = job.location || "";
+  article.dataset.searchText = [job.summary, job.responsibilities, job.requirements, job.benefits].filter(Boolean).join(" ");
   article.dataset.jobId = job.id || "";
 
   const top = document.createElement("div");
@@ -171,7 +206,12 @@ function createJobCard(job) {
   title.textContent = job.title || "Vị trí tuyển dụng";
 
   const detail = document.createElement("p");
+  detail.className = "job-card-meta";
   detail.textContent = [job.location, job.experience].filter(Boolean).join(" · ");
+
+  const summary = document.createElement("p");
+  summary.className = "job-card-summary";
+  summary.textContent = job.summary || "Xem nội dung công việc, yêu cầu và quyền lợi của vị trí này.";
 
   const footer = document.createElement("div");
   footer.className = "job-footer";
@@ -179,15 +219,84 @@ function createJobCard(job) {
   const salary = document.createElement("strong");
   salary.textContent = job.salary || "Thỏa thuận";
 
+  const actions = document.createElement("div");
+  actions.className = "job-card-actions";
+
+  const detailButton = document.createElement("button");
+  detailButton.type = "button";
+  detailButton.className = "job-detail-button";
+  detailButton.dataset.jobDetails = job.id || "";
+  detailButton.textContent = "Xem chi tiết";
+
   const applyButton = document.createElement("button");
   applyButton.type = "button";
+  applyButton.className = "job-apply-button";
   applyButton.dataset.openModal = "candidateModal";
   applyButton.dataset.position = job.title || "";
   applyButton.textContent = "Ứng tuyển";
 
-  footer.append(salary, applyButton);
-  article.append(top, category, title, detail, footer);
+  actions.append(detailButton, applyButton);
+  footer.append(salary, actions);
+  article.append(top, category, title, detail, summary, footer);
   return article;
+}
+
+function openJobDetails(jobId) {
+  const job = jobs.find((item) => item.id === jobId);
+  if (!job) return;
+
+  jobDetailElements.logo.textContent = job.logo || createInitials(job.title);
+  jobDetailElements.category.textContent = job.category || "Tin tuyển dụng";
+  jobDetailElements.title.textContent = job.title || "Chi tiết công việc";
+  jobDetailElements.meta.textContent = [job.location, job.category].filter(Boolean).join(" · ");
+  jobDetailElements.salary.textContent = job.salary || "Thỏa thuận";
+  jobDetailElements.experience.textContent = job.experience || "Không yêu cầu";
+  jobDetailElements.workHours.textContent = job.workHours || "Trao đổi khi phỏng vấn";
+  jobDetailElements.applyButton.dataset.position = job.title || "";
+
+  setDetailText(jobDetailElements.summary, job.summary);
+  const detailCount = [
+    setDetailSection(jobDetailElements.responsibilitiesSection, jobDetailElements.responsibilities, job.responsibilities),
+    setDetailSection(jobDetailElements.requirementsSection, jobDetailElements.requirements, job.requirements),
+    setDetailSection(jobDetailElements.benefitsSection, jobDetailElements.benefits, job.benefits),
+    setDetailSection(jobDetailElements.additionalInfoSection, jobDetailElements.additionalInfo, job.additionalInfo),
+  ].filter(Boolean).length;
+
+  jobDetailElements.empty.classList.toggle("hidden", detailCount > 0 || Boolean(job.summary));
+  openModal("jobDetailModal");
+}
+
+function setDetailText(element, value) {
+  const text = String(value || "").trim();
+  element.textContent = text;
+  element.classList.toggle("hidden", !text);
+}
+
+function setDetailSection(section, container, value) {
+  const lines = String(value || "")
+    .split(/\n+/)
+    .map((line) => line.replace(/^[-•*\d.)\s]+/, "").trim())
+    .filter(Boolean);
+
+  container.replaceChildren();
+  section.classList.toggle("hidden", lines.length === 0);
+  if (lines.length === 0) return false;
+
+  if (lines.length === 1) {
+    const paragraph = document.createElement("p");
+    paragraph.textContent = lines[0];
+    container.append(paragraph);
+    return true;
+  }
+
+  const list = document.createElement("ul");
+  for (const line of lines) {
+    const item = document.createElement("li");
+    item.textContent = line;
+    list.append(item);
+  }
+  container.append(list);
+  return true;
 }
 
 function createInitials(value) {
@@ -235,7 +344,7 @@ function filterJobs() {
 
   jobCards.forEach((card) => {
     const haystack = normalize(
-      `${card.dataset.title} ${card.dataset.category} ${card.dataset.location}`
+      `${card.dataset.title} ${card.dataset.category} ${card.dataset.location} ${card.dataset.searchText}`
     );
 
     const matchKeyword = !keyword || haystack.includes(keyword);
