@@ -527,10 +527,6 @@
             <textarea name="description" rows="4" maxlength="1500"></textarea>
           </label>
 
-          <label class="hp-field" aria-hidden="true">
-            <span>Website</span>
-            <input type="text" name="website" tabindex="-1" autocomplete="off" />
-          </label>
         </div>
 
         <label class="consent">
@@ -562,7 +558,7 @@
       <button class="modal-close" data-close-modal aria-label="Đóng">×</button>
       <span class="eyebrow">Dành cho ứng viên</span>
       <h2 id="candidateModalTitle">Gửi hồ sơ ứng viên</h2>
-      <p>Tải CV trực tiếp lên hệ thống bảo mật của Sanvendo. Ứng viên không phải trả phí.</p>
+      <p>Bạn có thể gửi đơn ứng tuyển trước, không bắt buộc phải có CV. Ứng viên không phải trả phí.</p>
 
       <form
         class="modal-form"
@@ -637,15 +633,6 @@
             </small>
           </label>
 
-          <label class="hp-field" aria-hidden="true">
-            <span>Website</span>
-            <input
-              type="text"
-              name="website"
-              tabindex="-1"
-              autocomplete="off"
-            />
-          </label>
         </div>
 
         <label class="consent">
@@ -658,15 +645,15 @@
         <p class="form-error hidden" id="candidateError" role="alert"></p>
 
         <button class="btn btn-primary btn-block" id="candidateSubmit" type="submit">
-          Gửi hồ sơ
+          Gửi đơn ứng tuyển
         </button>
       </form>
 
       <div class="success-message hidden" id="candidateSuccess">
         <div class="success-icon">✓</div>
-        <h3>Hồ sơ đã được gửi thành công</h3>
-        <p>
-          Mã hồ sơ: <strong id="candidateReference"></strong>.
+        <h3 id="candidateSuccessTitle">Đơn ứng tuyển đã được gửi thành công</h3>
+        <p id="candidateSuccessText">
+          Mã đơn: <strong id="candidateReference"></strong>.
           Sanvendo sẽ liên hệ khi có cơ hội phù hợp.
         </p>
       </div>

@@ -58,19 +58,6 @@ export async function onRequestPost(context) {
 
     const formData = await request.formData();
 
-    // Trường mồi chống bot. Người dùng bình thường không nhìn thấy trường này.
-    const website = cleanText(formData.get("website"), 200);
-    if (website) {
-      return json(
-        {
-          success: true,
-          message: "Hồ sơ đã được tiếp nhận.",
-          reference: createPublicReference(),
-        },
-        200
-      );
-    }
-
     const fullName = cleanText(formData.get("fullName"), 100);
     const phone = cleanText(formData.get("phone"), 30);
     const email = cleanText(formData.get("email"), 160).toLowerCase();
@@ -233,6 +220,7 @@ export async function onRequestPost(context) {
     return json(
       {
         success: true,
+        stored: true,
         message: hasCv
           ? "Hồ sơ và CV đã được gửi thành công."
           : "Thông tin ứng viên đã được gửi thành công. Bạn có thể bổ sung CV sau.",
@@ -300,10 +288,14 @@ function limitMetadata(value, maxLength) {
 }
 
 function isProvidedFile(value) {
-  return (
-    value instanceof File &&
-    Boolean(String(value.name || "").trim()) &&
-    value.size > 0
+  // Không phụ thuộc vào instanceof File vì multipart parser có thể trả về
+  // một đối tượng File khác realm. File rỗng/tên rỗng được xem là không có CV.
+  return Boolean(
+    value &&
+      typeof value === "object" &&
+      typeof value.arrayBuffer === "function" &&
+      Boolean(String(value.name || "").trim()) &&
+      Number(value.size || 0) > 0
   );
 }
 

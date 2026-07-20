@@ -37,19 +37,6 @@ export async function onRequestPost(context) {
 
     const formData = await request.formData();
 
-    // Trường mồi chống bot. Người dùng bình thường không nhìn thấy trường này.
-    const website = cleanText(formData.get("website"), 200);
-    if (website) {
-      return json(
-        {
-          success: true,
-          message: "Yêu cầu đã được tiếp nhận.",
-          reference: createPublicReference(),
-        },
-        200
-      );
-    }
-
     const company = cleanText(formData.get("company"), 160);
     const contact = cleanText(formData.get("contact"), 100);
     const phone = cleanText(formData.get("phone"), 30);
@@ -156,7 +143,8 @@ export async function onRequestPost(context) {
     return json(
       {
         success: true,
-        message: "Yêu cầu tuyển dụng đã được gửi thành công.",
+        stored: true,
+        message: "Yêu cầu tuyển dụng đã được lưu và gửi thành công.",
         reference,
       },
       201

@@ -353,8 +353,11 @@ requestForm?.addEventListener("submit", async (event) => {
     });
     const result = await parseJson(response);
 
-    if (!response.ok || !result.success) {
-      throw new Error(result.message || "Không thể gửi yêu cầu tuyển dụng.");
+    if (!response.ok || !result.success || result.stored !== true) {
+      throw new Error(
+        result.message ||
+          "Máy chủ chưa xác nhận đã lưu yêu cầu. Vui lòng gửi lại."
+      );
     }
 
     if (requestReference) requestReference.textContent = result.reference || "Đã tiếp nhận";
@@ -381,6 +384,12 @@ const candidateError = document.getElementById("candidateError");
 const candidateSuccess = document.getElementById("candidateSuccess");
 const candidateReference = document.getElementById("candidateReference");
 const cvFileInput = document.getElementById("cvFile");
+const candidateSuccessTitle = document.getElementById("candidateSuccessTitle");
+const candidateSuccessText = document.getElementById("candidateSuccessText");
+
+// CV là tùy chọn. Dòng này cũng vô hiệu hóa thuộc tính required nếu trình duyệt
+// đang dùng lại HTML cũ từ bộ nhớ đệm.
+cvFileInput?.removeAttribute("required");
 
 const MAX_CV_SIZE = 10 * 1024 * 1024;
 const ALLOWED_CV_EXTENSIONS = new Set(["pdf", "doc", "docx"]);
@@ -443,18 +452,41 @@ candidateForm?.addEventListener("submit", async (event) => {
       candidateSubmit.textContent = "Đang gửi hồ sơ...";
     }
 
+    const formData = new FormData(candidateForm);
+    const selectedCv = cvFileInput?.files?.[0];
+
+    // Không gửi một phần file rỗng. Một số trình duyệt tạo File có tên trống
+    // khi người dùng không chọn CV; xóa trường này giúp API hiểu chắc chắn rằng
+    // đây là hồ sơ không kèm CV.
+    if (!selectedCv || !selectedCv.name || selectedCv.size === 0) {
+      formData.delete("cv");
+    }
+
     const response = await fetch("/api/upload-cv", {
       method: "POST",
-      body: new FormData(candidateForm),
+      body: formData,
       headers: { Accept: "application/json" },
     });
     const result = await parseJson(response);
 
-    if (!response.ok || !result.success) {
-      throw new Error(result.message || "Không thể gửi hồ sơ.");
+    if (!response.ok || !result.success || result.stored !== true) {
+      throw new Error(
+        result.message ||
+          "Máy chủ chưa xác nhận đã lưu hồ sơ. Vui lòng gửi lại."
+      );
     }
 
     if (candidateReference) candidateReference.textContent = result.reference || "Đã tiếp nhận";
+    if (candidateSuccessTitle) {
+      candidateSuccessTitle.textContent = result.hasCv
+        ? "Hồ sơ và CV đã được gửi thành công"
+        : "Đơn ứng tuyển đã được gửi thành công";
+    }
+    if (candidateSuccessText) {
+      candidateSuccessText.firstChild.textContent = result.hasCv
+        ? "Mã hồ sơ: "
+        : "Mã đơn: ";
+    }
     candidateForm.reset();
     candidateForm.classList.add("hidden");
     candidateSuccess?.classList.remove("hidden");
