@@ -1,15 +1,16 @@
 {
   "name": "sanvendo-pages-r2-admin",
   "private": true,
-  "version": "3.5.0",
-  "description": "Sanvendo recruitment website with five-language job content, ten industry groups, R2-backed admin deletion, recruitment requests, and private CV uploads.",
+  "version": "3.5.1",
+  "description": "Sanvendo recruitment website for Cloudflare Pages and Pages Functions.",
+  "type": "module",
+  "engines": {
+    "node": ">=20 <23"
+  },
   "scripts": {
-    "dev": "wrangler pages dev public",
-    "deploy": "wrangler pages deploy public --project-name sanvendo",
+    "build": "node scripts/verify-build.mjs",
+    "dev": "npx --yes wrangler@4 pages dev public",
+    "deploy": "npx --yes wrangler@4 pages deploy public --project-name sanvendo",
     "test": "node --test tests/*.test.mjs"
-  },
-  "devDependencies": {
-    "wrangler": "^4.0.0"
-  },
-  "type": "module"
+  }
 }
