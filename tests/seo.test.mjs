@@ -105,4 +105,32 @@ test("trang chi tiết hiển thị đúng bản dịch tiếng Trung và bộ c
   assert.match(html, /工作职责/);
   assert.match(html, /class="job-language-switcher"/);
   assert.match(html, /\?lang=ko/);
+  assert.match(html, /\?lang=ja/);
+});
+
+
+test("trang chi tiết hỗ trợ tiếng Nhật", async () => {
+  const translatedJob = {
+    ...completeJob,
+    translations: {
+      ja: { title: "B2B営業スタッフ", location: "ホーチミン市", summary: "法人顧客を開拓します。" },
+    },
+  };
+  const bucket = {
+    async get() {
+      return { async text() { return JSON.stringify([translatedJob]); } };
+    },
+  };
+  const response = await getJobPage({
+    request: new Request(`https://sanvendo.com/jobs/${completeJob.id}?lang=ja`),
+    params: { id: completeJob.id },
+    env: { CV_BUCKET: bucket, SITE_ORIGIN: "https://sanvendo.com" },
+  });
+
+  const html = await response.text();
+  assert.equal(response.status, 200);
+  assert.match(html, /<html lang="ja">/);
+  assert.match(html, /日本語/);
+  assert.match(html, /B2B営業スタッフ/);
+  assert.match(html, /hreflang="ja"/);
 });

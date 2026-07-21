@@ -14,7 +14,7 @@ export const JOB_CATEGORIES = [
 ];
 
 const DEFAULT_CREATED_AT = "2026-07-20T00:00:00.000Z";
-const TRANSLATION_LANGUAGES = ["en", "zh", "ko"];
+const TRANSLATION_LANGUAGES = ["en", "zh", "ko", "ja"];
 
 const EMPLOYMENT_TYPES = new Set([
   "FULL_TIME",

@@ -85,7 +85,7 @@ function renderJobPage(sourceJob, language, env) {
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="${escapeHtml(title)}">
   <meta name="twitter:description" content="${escapeHtml(description)}">
-  <link rel="stylesheet" href="/job.css?v=20260721-1">
+  <link rel="stylesheet" href="/job.css?v=20260721-2">
   ${schema ? `<script type="application/ld+json">${safeJson(schema)}</script>` : ""}
 </head>
 <body>
@@ -162,7 +162,7 @@ function buildLocalizedDescriptionHtml(job, text) {
 
 function buildPageTitle(job, language) {
   if (language === "en") return `${job.title} in ${job.location} — ${SITE_NAME}`;
-  if (language === "zh" || language === "ko") return `${job.title} · ${job.location} — ${SITE_NAME}`;
+  if (["zh", "ko", "ja"].includes(language)) return `${job.title} · ${job.location} — ${SITE_NAME}`;
   return `${job.title} tại ${job.location} — ${SITE_NAME}`;
 }
 
@@ -202,7 +202,7 @@ function errorPage(message, status, context, language = "vi") {
   const config = LANGUAGE_CONFIG[language];
   const text = pageText(language);
   const homeUrl = languageUrl("/", language);
-  return new Response(`<!doctype html><html lang="${escapeHtml(config.htmlLang)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>${status} — Sanvendo</title><link rel="stylesheet" href="/job.css?v=20260721-1"></head><body><main class="error-page"><h1>${status}</h1><p>${escapeHtml(message)}</p><a class="primary-button" href="${escapeHtml(homeUrl)}">${escapeHtml(text.backHome)}</a></main></body></html>`, {
+  return new Response(`<!doctype html><html lang="${escapeHtml(config.htmlLang)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>${status} — Sanvendo</title><link rel="stylesheet" href="/job.css?v=20260721-2"></head><body><main class="error-page"><h1>${status}</h1><p>${escapeHtml(message)}</p><a class="primary-button" href="${escapeHtml(homeUrl)}">${escapeHtml(text.backHome)}</a></main></body></html>`, {
     status,
     headers: pageHeaders(context.request, {
       "Cache-Control": "no-store",

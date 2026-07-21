@@ -104,7 +104,7 @@ test("chấp nhận hai nhóm ngành nghề mới", () => {
   assert.equal(factory("Bán lẻ & Dịch vụ").category, "Bán lẻ & Dịch vụ");
 });
 
-test("lưu bản dịch Anh, Trung và Hàn, bỏ qua trường trống", () => {
+test("lưu bản dịch Anh, Trung, Hàn và Nhật, bỏ qua trường trống", () => {
   const job = cleanJobInput({
     title: "Nhân viên kinh doanh",
     category: "Kinh doanh",
@@ -124,6 +124,10 @@ test("lưu bản dịch Anh, Trung và Hàn, bỏ qua trường trống", () => 
         title: "영업 담당자",
         benefits: "성과급 지급",
       },
+      ja: {
+        title: "営業スタッフ",
+        summary: "法人顧客を開拓します。",
+      },
       fr: { title: "Doit être ignoré" },
     },
   });
@@ -132,5 +136,6 @@ test("lưu bản dịch Anh, Trung và Hàn, bỏ qua trường trống", () => 
   assert.deepEqual(job.translations.en.featuredTags, ["B2B", "Sales"]);
   assert.equal(job.translations.zh.requirements, "良好的沟通能力");
   assert.equal(job.translations.ko.benefits, "성과급 지급");
+  assert.equal(job.translations.ja.title, "営業スタッフ");
   assert.equal(job.translations.fr, undefined);
 });

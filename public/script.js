@@ -11,6 +11,55 @@ const i18n = window.SanvendoI18n || {
 };
 const tx = (value, params) => i18n.t(value, params);
 
+
+const CATEGORY_DEFINITIONS = [
+  { value: "Kinh doanh", icon: "↗" },
+  { value: "Marketing", icon: "✦" },
+  { value: "Kế toán", icon: "₫" },
+  { value: "Nhân sự", icon: "◎" },
+  { value: "Công nghệ", icon: "</>" },
+  { value: "Kỹ thuật", icon: "⚙" },
+  { value: "Logistics", icon: "▣" },
+  { value: "Chăm sóc khách hàng", icon: "◌" },
+  { value: "Lao động phổ thông", icon: "◆" },
+  { value: "Bán lẻ & Dịch vụ", icon: "◈" },
+];
+
+function ensureAllCategoryCards() {
+  const grid = document.querySelector(".category-grid");
+  if (!grid) return;
+
+  const existing = new Map(
+    [...grid.querySelectorAll(".category-card[data-category]")]
+      .map((card) => [card.dataset.category, card])
+  );
+
+  for (const category of CATEGORY_DEFINITIONS) {
+    if (existing.has(category.value)) continue;
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "category-card";
+    button.dataset.category = category.value;
+
+    const icon = document.createElement("span");
+    icon.className = "category-icon";
+    icon.textContent = category.icon;
+
+    const title = document.createElement("strong");
+    title.textContent = i18n.categoryLabel(category.value);
+
+    const count = document.createElement("small");
+    count.dataset.categoryCount = "";
+    count.textContent = tx("Đang tải tin...");
+
+    button.append(icon, title, count);
+    grid.append(button);
+  }
+}
+
+ensureAllCategoryCards();
+
 const menuToggle = document.getElementById("menuToggle");
 const mainNav = document.getElementById("mainNav");
 const toast = document.getElementById("toast");
@@ -305,7 +354,7 @@ function createJobCard(sourceJob) {
   article.dataset.location = sourceJob.location || "";
   article.dataset.searchText = [
     sourceJob.title, sourceJob.location, sourceJob.category, sourceJob.summary, sourceJob.responsibilities, sourceJob.requirements, sourceJob.benefits,
-    ...["vi", "en", "zh", "ko"].map((language) => i18n.categoryLabel(sourceJob.category, language)),
+    ...["vi", "en", "zh", "ko", "ja"].map((language) => i18n.categoryLabel(sourceJob.category, language)),
     ...Object.values(sourceJob.translations || {}).flatMap((translation) => [translation?.title, translation?.location, translation?.summary, translation?.responsibilities, translation?.requirements, translation?.benefits])
   ].filter(Boolean).join(" ");
   article.dataset.jobId = job.id || "";

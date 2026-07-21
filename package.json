@@ -1,8 +1,8 @@
 {
   "name": "sanvendo-pages-r2-admin",
   "private": true,
-  "version": "3.4.0",
-  "description": "Sanvendo recruitment website with R2-backed job posts, recruitment requests, private CV uploads, and a Cloudflare Access protected admin dashboard.",
+  "version": "3.5.0",
+  "description": "Sanvendo recruitment website with five-language job content, ten industry groups, R2-backed admin deletion, recruitment requests, and private CV uploads.",
   "scripts": {
     "dev": "wrangler pages dev public",
     "deploy": "wrangler pages deploy public --project-name sanvendo",

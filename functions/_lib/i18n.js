@@ -1,47 +1,55 @@
-export const SUPPORTED_LANGUAGES = ["vi", "en", "zh", "ko"];
+export const SUPPORTED_LANGUAGES = ["vi", "en", "zh", "ko", "ja"];
 
 export const LANGUAGE_CONFIG = {
   vi: { locale: "vi-VN", htmlLang: "vi", ogLocale: "vi_VN", label: "VI" },
   en: { locale: "en-US", htmlLang: "en", ogLocale: "en_US", label: "EN" },
   zh: { locale: "zh-CN", htmlLang: "zh-CN", ogLocale: "zh_CN", label: "中文" },
   ko: { locale: "ko-KR", htmlLang: "ko", ogLocale: "ko_KR", label: "한국어" },
+  ja: { locale: "ja-JP", htmlLang: "ja", ogLocale: "ja_JP", label: "日本語" },
 };
 
 const CATEGORY_LABELS = {
-  vi: {
-    "Kinh doanh": "Kinh doanh & Bán hàng", Marketing: "Marketing & Truyền thông",
-    "Kế toán": "Kế toán & Tài chính", "Nhân sự": "Hành chính & Nhân sự",
-    "Công nghệ": "Công nghệ thông tin", "Kỹ thuật": "Sản xuất, Kỹ thuật & QA/QC",
-    Logistics: "Kho vận & Chuỗi cung ứng", "Chăm sóc khách hàng": "Chăm sóc khách hàng",
-    "Lao động phổ thông": "Lao động phổ thông & Vận hành", "Bán lẻ & Dịch vụ": "Bán lẻ, Nhà hàng & Dịch vụ",
-  },
-  en: {
-    "Kinh doanh": "Sales & Business Development", Marketing: "Marketing & Communications",
-    "Kế toán": "Accounting & Finance", "Nhân sự": "Administration & Human Resources",
-    "Công nghệ": "Information Technology", "Kỹ thuật": "Manufacturing, Engineering & QA/QC",
-    Logistics: "Logistics & Supply Chain", "Chăm sóc khách hàng": "Customer Service",
-    "Lao động phổ thông": "General Labor & Operations", "Bán lẻ & Dịch vụ": "Retail, Food Service & Hospitality",
-  },
-  zh: {
-    "Kinh doanh": "销售与业务拓展", Marketing: "市场营销与传播", "Kế toán": "会计与财务",
-    "Nhân sự": "行政与人力资源", "Công nghệ": "信息技术", "Kỹ thuật": "生产、工程与质量管理",
-    Logistics: "物流与供应链", "Chăm sóc khách hàng": "客户服务", "Lao động phổ thông": "普工与运营",
-    "Bán lẻ & Dịch vụ": "零售、餐饮与服务",
-  },
-  ko: {
-    "Kinh doanh": "영업 및 사업개발", Marketing: "마케팅 및 커뮤니케이션", "Kế toán": "회계 및 재무",
-    "Nhân sự": "총무 및 인사", "Công nghệ": "정보기술", "Kỹ thuật": "생산·엔지니어링·QA/QC",
-    Logistics: "물류 및 공급망", "Chăm sóc khách hàng": "고객 서비스", "Lao động phổ thông": "일반 생산직 및 운영",
-    "Bán lẻ & Dịch vụ": "소매·외식·서비스",
-  },
-};
+    vi: {
+      "Kinh doanh": "Kinh doanh & Bán hàng", Marketing: "Marketing & Truyền thông",
+      "Kế toán": "Kế toán & Tài chính", "Nhân sự": "Hành chính & Nhân sự",
+      "Công nghệ": "Công nghệ thông tin", "Kỹ thuật": "Sản xuất, Kỹ thuật & QA/QC",
+      Logistics: "Kho vận & Chuỗi cung ứng", "Chăm sóc khách hàng": "Chăm sóc khách hàng",
+      "Lao động phổ thông": "Lao động phổ thông & Vận hành", "Bán lẻ & Dịch vụ": "Bán lẻ, Nhà hàng & Dịch vụ",
+    },
+    en: {
+      "Kinh doanh": "Sales & Business Development", Marketing: "Marketing & Communications",
+      "Kế toán": "Accounting & Finance", "Nhân sự": "Administration & Human Resources",
+      "Công nghệ": "Information Technology", "Kỹ thuật": "Manufacturing, Engineering & QA/QC",
+      Logistics: "Logistics & Supply Chain", "Chăm sóc khách hàng": "Customer Service",
+      "Lao động phổ thông": "General Labor & Operations", "Bán lẻ & Dịch vụ": "Retail, Food Service & Hospitality",
+    },
+    zh: {
+      "Kinh doanh": "销售与业务拓展", Marketing: "市场营销与传播", "Kế toán": "会计与财务",
+      "Nhân sự": "行政与人力资源", "Công nghệ": "信息技术", "Kỹ thuật": "生产、工程与质量管理",
+      Logistics: "物流与供应链", "Chăm sóc khách hàng": "客户服务", "Lao động phổ thông": "普工与运营",
+      "Bán lẻ & Dịch vụ": "零售、餐饮与服务",
+    },
+    ko: {
+      "Kinh doanh": "영업 및 사업개발", Marketing: "마케팅 및 커뮤니케이션", "Kế toán": "회계 및 재무",
+      "Nhân sự": "총무 및 인사", "Công nghệ": "정보기술", "Kỹ thuật": "생산·엔지니어링·QA/QC",
+      Logistics: "물류 및 공급망", "Chăm sóc khách hàng": "고객 서비스", "Lao động phổ thông": "일반 생산직 및 운영",
+      "Bán lẻ & Dịch vụ": "소매·외식·서비스",
+    },
+    ja: {
+      "Kinh doanh": "営業・事業開発", Marketing: "マーケティング・広報", "Kế toán": "経理・財務",
+      "Nhân sự": "総務・人事", "Công nghệ": "情報技術", "Kỹ thuật": "製造・技術・QA/QC",
+      Logistics: "物流・サプライチェーン", "Chăm sóc khách hàng": "カスタマーサービス", "Lao động phổ thông": "一般作業・オペレーション",
+      "Bán lẻ & Dịch vụ": "小売・飲食・サービス",
+    },
+  };
 
 const EMPLOYMENT_TYPES = {
-  vi: { FULL_TIME: "Toàn thời gian", PART_TIME: "Bán thời gian", CONTRACTOR: "Hợp đồng / cộng tác", TEMPORARY: "Tạm thời", INTERN: "Thực tập", VOLUNTEER: "Tình nguyện", PER_DIEM: "Theo ngày", OTHER: "Khác" },
-  en: { FULL_TIME: "Full-time", PART_TIME: "Part-time", CONTRACTOR: "Contract / Freelance", TEMPORARY: "Temporary", INTERN: "Internship", VOLUNTEER: "Volunteer", PER_DIEM: "Per diem", OTHER: "Other" },
-  zh: { FULL_TIME: "全职", PART_TIME: "兼职", CONTRACTOR: "合同工 / 合作", TEMPORARY: "临时", INTERN: "实习", VOLUNTEER: "志愿者", PER_DIEM: "按日计薪", OTHER: "其他" },
-  ko: { FULL_TIME: "정규직", PART_TIME: "파트타임", CONTRACTOR: "계약직 / 프리랜서", TEMPORARY: "임시직", INTERN: "인턴", VOLUNTEER: "자원봉사", PER_DIEM: "일급제", OTHER: "기타" },
-};
+    vi: { FULL_TIME: "Toàn thời gian", PART_TIME: "Bán thời gian", CONTRACTOR: "Hợp đồng / cộng tác", TEMPORARY: "Tạm thời", INTERN: "Thực tập", VOLUNTEER: "Tình nguyện", PER_DIEM: "Theo ngày", OTHER: "Khác" },
+    en: { FULL_TIME: "Full-time", PART_TIME: "Part-time", CONTRACTOR: "Contract / Freelance", TEMPORARY: "Temporary", INTERN: "Internship", VOLUNTEER: "Volunteer", PER_DIEM: "Per diem", OTHER: "Other" },
+    zh: { FULL_TIME: "全职", PART_TIME: "兼职", CONTRACTOR: "合同工 / 合作", TEMPORARY: "临时", INTERN: "实习", VOLUNTEER: "志愿者", PER_DIEM: "按日计薪", OTHER: "其他" },
+    ko: { FULL_TIME: "정규직", PART_TIME: "파트타임", CONTRACTOR: "계약직 / 프리랜서", TEMPORARY: "임시직", INTERN: "인턴", VOLUNTEER: "자원봉사", PER_DIEM: "일급제", OTHER: "기타" },
+    ja: { FULL_TIME: "正社員", PART_TIME: "パートタイム", CONTRACTOR: "契約・業務委託", TEMPORARY: "臨時雇用", INTERN: "インターン", VOLUNTEER: "ボランティア", PER_DIEM: "日給", OTHER: "その他" },
+  };
 
 const PAGE_TEXT = {
   vi: {
@@ -96,6 +104,20 @@ const PAGE_TEXT = {
     backHome: "홈으로", unavailable: "채용 서비스가 일시적으로 중단되었습니다.",
     notFound: "이 채용공고는 더 이상 표시되지 않습니다.", loadError: "직무 상세 정보를 불러올 수 없습니다.", at: "·",
   },
+  ja: {
+    home: "ホーム", jobs: "求人", apply: "応募", location: "勤務地", salary: "給与",
+    experience: "経験", noExperience: "不問", workHours: "勤務時間", interview: "面接時に相談",
+    responsibilities: "仕事内容", requirements: "応募条件", benefits: "福利厚生",
+    additionalInfo: "追加情報", workingHours: "勤務時間", jobInfo: "求人情報",
+    missingDetails: "この求人の詳細についてはSanvendoへお問い合わせください。",
+    applyTitle: "この求人に応募", applyNote: "先に情報を送信でき、履歴書は任意です。求職者の利用は無料です。",
+    submitApplication: "応募を送信", otherJobs: "他の求人を見る", datePosted: "掲載日",
+    validThrough: "応募締切", jobId: "求人ID", updating: "更新中",
+    hiringCompany: "Sanvendoを通じて採用する企業", footer: "オンデマンド採用・ヘッドハンティング",
+    backHome: "ホームへ戻る", unavailable: "求人サービスは一時的に利用できません。",
+    notFound: "この求人は現在掲載されていません。", loadError: "求人詳細を読み込めません。", at: "・",
+  },
+
 };
 
 export function normalizeLanguage(value) {

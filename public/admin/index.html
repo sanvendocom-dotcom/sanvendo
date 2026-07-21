@@ -413,6 +413,71 @@
           </div>
         </details>
 
+        <details class="translation-panel" data-translation-language="ja">
+          <summary>
+            <span class="translation-code">日本語</span>
+            <span><strong>Bản dịch tiếng Nhật</strong><small>Không bắt buộc. Ô để trống sẽ tự dùng nội dung tiếng Việt.</small></span>
+          </summary>
+          <div class="translation-panel-body job-editor-grid detail-grid">
+            <label class="form-field form-field-wide">
+              <span>Tên vị trí (日本語)</span>
+              <input id="jobTitleJa" type="text" maxlength="160">
+            </label>
+            <label class="form-field">
+              <span>Tên doanh nghiệp (日本語)</span>
+              <input id="jobCompanyNameJa" type="text" maxlength="160">
+            </label>
+            <label class="form-field">
+              <span>Địa điểm (日本語)</span>
+              <input id="jobLocationJa" type="text" maxlength="120">
+            </label>
+            <label class="form-field">
+              <span>Kinh nghiệm (日本語)</span>
+              <input id="jobExperienceJa" type="text" maxlength="160">
+            </label>
+            <label class="form-field">
+              <span>Mức lương (日本語)</span>
+              <input id="jobSalaryJa" type="text" maxlength="120">
+            </label>
+            <label class="form-field">
+              <span>Thời gian làm việc (日本語)</span>
+              <input id="jobWorkHoursJa" type="text" maxlength="160">
+            </label>
+            <label class="form-field form-field-full">
+              <span>Giới thiệu ngắn (日本語)</span>
+              <textarea id="jobSummaryJa" rows="3" maxlength="1200"></textarea>
+            </label>
+            <label class="form-field">
+              <span>Mô tả công việc (日本語)</span>
+              <textarea id="jobResponsibilitiesJa" rows="6" maxlength="5000"></textarea>
+            </label>
+            <label class="form-field">
+              <span>Yêu cầu ứng viên (日本語)</span>
+              <textarea id="jobRequirementsJa" rows="6" maxlength="5000"></textarea>
+            </label>
+            <label class="form-field">
+              <span>Quyền lợi (日本語)</span>
+              <textarea id="jobBenefitsJa" rows="6" maxlength="5000"></textarea>
+            </label>
+            <label class="form-field">
+              <span>Thông tin bổ sung (日本語)</span>
+              <textarea id="jobAdditionalInfoJa" rows="6" maxlength="3000"></textarea>
+            </label>
+            <label class="form-field form-field-wide">
+              <span>Thẻ nổi bật (日本語)</span>
+              <input id="jobFeaturedTagsJa" type="text" maxlength="140" placeholder="Tối đa 3 thẻ, cách nhau bằng dấu phẩy">
+            </label>
+            <label class="form-field">
+              <span>Hồ sơ mục tiêu (日本語)</span>
+              <input id="jobTargetCandidatesJa" type="text" maxlength="80">
+            </label>
+            <label class="form-field">
+              <span>Nhãn góc phải (日本語)</span>
+              <input id="jobFeaturedBadgeJa" type="text" maxlength="30">
+            </label>
+          </div>
+        </details>
+
         <div class="job-editor-footer">
           <label class="publish-field">
             <input id="jobPublished" name="published" type="checkbox" checked>
@@ -487,12 +552,12 @@
           <thead>
             <tr>
               <th>Doanh nghiệp</th>
+              <th class="action-column">Thao tác</th>
               <th>Người liên hệ</th>
               <th>Nhu cầu tuyển</th>
               <th>Điều kiện</th>
               <th>Ngày gửi</th>
               <th>Mô tả</th>
-              <th>Thao tác</th>
             </tr>
           </thead>
           <tbody id="requestRows"></tbody>
@@ -549,11 +614,11 @@
           <thead>
             <tr>
               <th>Ứng viên</th>
+              <th class="action-column">Thao tác</th>
               <th>Liên hệ</th>
               <th>Vị trí mong muốn</th>
               <th>Ngày gửi</th>
               <th>CV</th>
-              <th>Thao tác</th>
             </tr>
           </thead>
           <tbody id="candidateRows"></tbody>

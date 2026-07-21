@@ -611,7 +611,7 @@ img {
 
 .category-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 16px;
 }
 
@@ -1710,7 +1710,7 @@ img {
   justify-content: center;
 }
 
-/* Language selector: Vietnamese, English, Simplified Chinese and Korean. */
+/* Language selector: Vietnamese, English, Simplified Chinese, Korean and Japanese. */
 .language-switcher {
   display: inline-flex;
   align-items: center;
@@ -1780,7 +1780,8 @@ img {
   }
 
   .language-switcher button[data-language="zh"],
-  .language-switcher button[data-language="ko"] {
+  .language-switcher button[data-language="ko"],
+  .language-switcher button[data-language="ja"] {
     max-width: 42px;
     overflow: hidden;
     text-overflow: clip;

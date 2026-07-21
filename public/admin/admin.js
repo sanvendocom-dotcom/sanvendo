@@ -1,5 +1,5 @@
-const TRANSLATION_LANGUAGES = ["en", "zh", "ko"];
-const TRANSLATION_SUFFIXES = { en: "En", zh: "Zh", ko: "Ko" };
+const TRANSLATION_LANGUAGES = ["en", "zh", "ko", "ja"];
+const TRANSLATION_SUFFIXES = { en: "En", zh: "Zh", ko: "Ko", ja: "Ja" };
 const TRANSLATION_FIELDS = [
   "title", "companyName", "location", "experience", "salary", "workHours",
   "summary", "responsibilities", "requirements", "benefits", "additionalInfo",
@@ -588,6 +588,10 @@ function createRequestRow(request) {
       textElement("p", request.company || "Chưa có tên doanh nghiệp", "candidate-name"),
       textElement("span", request.reference || "Không có mã yêu cầu", "reference"),
     ]),
+    createCell(
+      [listDeleteButton("requests", request.key, "Xóa tin")],
+      "action-cell"
+    ),
     createCell([
       textElement("span", request.contact || "Chưa có người liên hệ", "candidate-name"),
       linkElement(`mailto:${request.email}`, request.email || "Chưa có email", "contact-link"),
@@ -606,11 +610,7 @@ function createRequestRow(request) {
       textElement("span", formatRelativeTime(request.submittedAt), "secondary-text"),
       labeledText("Cần nhân sự", request.deadline || "Chưa cung cấp"),
     ]),
-    createCell([descriptionElement(request.description || "Không có mô tả thêm")]),
-    createCell(
-      [listDeleteButton("requests", request.key, "Xóa yêu cầu")],
-      "action-cell"
-    )
+    createCell([descriptionElement(request.description || "Không có mô tả thêm")])
   );
 
   return row;
@@ -637,6 +637,10 @@ function createCandidateRow(candidate) {
       textElement("p", candidate.name || "Chưa có tên", "candidate-name"),
       textElement("span", candidate.reference || "Không có mã hồ sơ", "reference"),
     ]),
+    createCell(
+      [listDeleteButton("candidates", candidate.key, "Xóa tin")],
+      "action-cell"
+    ),
     createCell([
       linkElement(`mailto:${candidate.email}`, candidate.email || "Chưa có email", "contact-link"),
       linkElement(`tel:${candidate.phone}`, candidate.phone || "Chưa có điện thoại", "contact-link"),
@@ -660,10 +664,6 @@ function createCandidateRow(candidate) {
             textElement("span", "Chưa gửi CV", "file-name no-cv"),
             textElement("span", "Đã nhận thông tin liên hệ", "secondary-text"),
           ]
-    ),
-    createCell(
-      [listDeleteButton("candidates", candidate.key, "Xóa hồ sơ")],
-      "action-cell"
     )
   );
 
