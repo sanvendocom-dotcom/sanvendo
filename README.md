@@ -3,6 +3,7 @@
 Phiên bản này bao gồm:
 
 - Website tuyển dụng công khai với tin việc làm tải động theo ngành nghề.
+- Giao diện 4 ngôn ngữ: Tiếng Việt, English, 中文 và 한국어; ghi nhớ lựa chọn của người xem.
 - Form doanh nghiệp lưu yêu cầu tuyển dụng thật vào R2 và hiển thị trong trang quản trị.
 - Form ứng viên cho phép gửi thông tin không cần CV; CV PDF/DOC/DOCX là tùy chọn, tối đa 10 MB.
 - Lưu CV hoặc bản ghi thông tin ứng viên không có CV vào bucket R2 riêng tư `sanvendo-private-cv`.
@@ -20,12 +21,14 @@ public/
 │   ├── admin.css
 │   └── admin.js
 ├── index.html
+├── i18n.js
 ├── style.css
 └── script.js
 
 functions/
 ├── _lib/
 │   ├── access.js
+│   ├── i18n.js
 │   └── jobs.js
 ├── admin/
 │   ├── _middleware.js
@@ -40,6 +43,34 @@ functions/
     ├── recruitment-request.js
     └── upload-cv.js
 ```
+
+
+## Giao diện và tin tuyển dụng 4 ngôn ngữ
+
+Trang công khai có bộ chuyển ngôn ngữ:
+
+```text
+VI · EN · 中文 · 한국어
+```
+
+Lựa chọn được lưu trong trình duyệt. Trang chi tiết việc làm dùng tham số:
+
+```text
+?lang=vi
+?lang=en
+?lang=zh
+?lang=ko
+```
+
+Trong `/admin`, khi tạo hoặc sửa tin tuyển dụng có ba khối bản dịch có thể mở rộng:
+
+- English.
+- 中文 — tiếng Trung giản thể.
+- 한국어 — tiếng Hàn.
+
+Có thể dịch tên vị trí, doanh nghiệp, địa điểm, kinh nghiệm, lương, thời gian làm việc, giới thiệu, mô tả, yêu cầu, quyền lợi, thông tin bổ sung và nội dung tin nổi bật. Các ô bản dịch không bắt buộc. Trường nào để trống sẽ tự dùng nội dung tiếng Việt, vì vậy tin cũ không bị lỗi hoặc mất nội dung.
+
+Dữ liệu bản dịch được lưu bên trong từng tin trong `site/jobs.json`, không cần thêm bucket, binding hoặc biến môi trường.
 
 ## Cấu hình bắt buộc trong Cloudflare Pages
 

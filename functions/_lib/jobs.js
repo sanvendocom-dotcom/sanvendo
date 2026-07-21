@@ -14,6 +14,8 @@ export const JOB_CATEGORIES = [
 ];
 
 const DEFAULT_CREATED_AT = "2026-07-20T00:00:00.000Z";
+const TRANSLATION_LANGUAGES = ["en", "zh", "ko"];
+
 const EMPLOYMENT_TYPES = new Set([
   "FULL_TIME",
   "PART_TIME",
@@ -187,6 +189,7 @@ export function cleanJobInput(value) {
     featuredTags: cleanTagList(source.featuredTags),
     targetCandidates: cleanText(source.targetCandidates, 80),
     featuredBadge: cleanText(source.featuredBadge, 30) || "Mới",
+    translations: cleanJobTranslations(source.translations),
     published,
   };
 }
@@ -251,6 +254,43 @@ function cleanMultilineText(value, maxLength) {
     .slice(0, maxLength);
 }
 
+function cleanJobTranslations(value) {
+  const source = value && typeof value === "object" ? value : {};
+  const translations = {};
+
+  for (const language of TRANSLATION_LANGUAGES) {
+    const item = source[language];
+    if (!item || typeof item !== "object") continue;
+
+    const translation = {
+      title: cleanText(item.title, 160),
+      companyName: cleanText(item.companyName, 160),
+      location: cleanText(item.location, 120),
+      experience: cleanText(item.experience, 160),
+      workHours: cleanText(item.workHours, 160),
+      summary: cleanMultilineText(item.summary, 1200),
+      responsibilities: cleanMultilineText(item.responsibilities, 5000),
+      requirements: cleanMultilineText(item.requirements, 5000),
+      benefits: cleanMultilineText(item.benefits, 5000),
+      additionalInfo: cleanMultilineText(item.additionalInfo, 3000),
+      salary: cleanText(item.salary, 120),
+      featuredTags: cleanTagList(item.featuredTags),
+      targetCandidates: cleanText(item.targetCandidates, 80),
+      featuredBadge: cleanText(item.featuredBadge, 30),
+    };
+
+    const compact = Object.fromEntries(
+      Object.entries(translation).filter(([, fieldValue]) =>
+        Array.isArray(fieldValue) ? fieldValue.length > 0 : Boolean(fieldValue)
+      )
+    );
+
+    if (Object.keys(compact).length) translations[language] = compact;
+  }
+
+  return translations;
+}
+
 function cleanTagList(value) {
   const source = Array.isArray(value) ? value : String(value || "").split(",");
   const unique = [];
@@ -285,5 +325,14 @@ function cleanDateOnly(value) {
 }
 
 function cloneDefaults() {
-  return DEFAULT_JOBS.map((job) => ({ ...job }));
+  return DEFAULT_JOBS.map((job) => ({
+    ...job,
+    featuredTags: Array.isArray(job.featuredTags) ? [...job.featuredTags] : [],
+    translations: job.translations
+      ? Object.fromEntries(Object.entries(job.translations).map(([language, value]) => [
+          language,
+          { ...value, featuredTags: Array.isArray(value.featuredTags) ? [...value.featuredTags] : [] },
+        ]))
+      : {},
+  }));
 }

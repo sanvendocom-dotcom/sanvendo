@@ -1,6 +1,13 @@
 import { loadJobs } from "../_lib/jobs.js";
 import {
-  buildJobDescriptionHtml,
+  LANGUAGE_CONFIG,
+  SUPPORTED_LANGUAGES,
+  languageUrl,
+  localizeJob,
+  pageText,
+  requestLanguage,
+} from "../_lib/i18n.js";
+import {
   buildJobPostingSchema,
   escapeHtml,
   getSiteOrigin,
@@ -8,11 +15,15 @@ import {
   jobUrl,
   safeJson,
   SITE_NAME,
+  textToParagraphs,
 } from "../_lib/seo.js";
 
 export async function onRequestGet(context) {
+  const language = requestLanguage(context.request);
+  const text = pageText(language);
+
   if (!context.env.CV_BUCKET) {
-    return errorPage("Dịch vụ việc làm đang tạm thời gián đoạn.", 503, context);
+    return errorPage(text.unavailable, 503, context, language);
   }
 
   try {
@@ -21,36 +32,42 @@ export async function onRequestGet(context) {
     const job = jobs.find((item) => item.id === id);
 
     if (!job || !isJobActive(job)) {
-      return errorPage("Tin tuyển dụng không còn hiển thị.", 404, context);
+      return errorPage(text.notFound, 404, context, language);
     }
 
-    return new Response(renderJobPage(job, context.env), {
+    return new Response(renderJobPage(job, language, context.env), {
       status: 200,
       headers: pageHeaders(context.request, {
         "Cache-Control": "public, max-age=60, s-maxage=300, stale-while-revalidate=86400",
+        "Content-Language": LANGUAGE_CONFIG[language].htmlLang,
       }),
     });
   } catch (error) {
     console.error("Job detail page error", error);
-    return errorPage("Không thể tải chi tiết công việc.", 500, context);
+    return errorPage(text.loadError, 500, context, language);
   }
 }
 
-function renderJobPage(job, env) {
+function renderJobPage(sourceJob, language, env) {
+  const config = LANGUAGE_CONFIG[language];
+  const text = pageText(language);
+  const job = localizeJob(sourceJob, language);
   const origin = getSiteOrigin(env);
-  const canonical = jobUrl(job, env);
+  const canonical = jobUrl(sourceJob, env);
   const schema = buildJobPostingSchema(job, env);
-  const title = `${job.title} tại ${job.location} — ${SITE_NAME}`;
-  const description = String(job.summary || `${job.title} tại ${job.location}. Mức lương ${job.salary}.`)
+  const title = buildPageTitle(job, language);
+  const description = String(job.summary || `${job.title} · ${job.location}. ${text.salary}: ${job.salary}.`)
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, 160);
-  const detailHtml = buildJobDescriptionHtml(job);
-  const applyUrl = `${origin}/?apply=1&position=${encodeURIComponent(job.title)}#candidates`;
-  const companyName = job.companyName || "Doanh nghiệp tuyển dụng qua Sanvendo";
+  const detailHtml = buildLocalizedDescriptionHtml(job, text);
+  const applyUrl = buildApplyUrl(origin, job.title, language);
+  const homeUrl = languageUrl("/", language);
+  const jobsUrl = languageUrl("/#jobs", language);
+  const companyName = job.companyName || text.hiringCompany;
 
   return `<!doctype html>
-<html lang="vi">
+<html lang="${escapeHtml(config.htmlLang)}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -58,8 +75,9 @@ function renderJobPage(job, env) {
   <meta name="description" content="${escapeHtml(description)}">
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
   <link rel="canonical" href="${escapeHtml(canonical)}">
+  ${renderAlternateLinks(sourceJob, env)}
   <meta property="og:type" content="website">
-  <meta property="og:locale" content="vi_VN">
+  <meta property="og:locale" content="${escapeHtml(config.ogLocale)}">
   <meta property="og:site_name" content="Sanvendo">
   <meta property="og:title" content="${escapeHtml(title)}">
   <meta property="og:description" content="${escapeHtml(description)}">
@@ -67,61 +85,129 @@ function renderJobPage(job, env) {
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="${escapeHtml(title)}">
   <meta name="twitter:description" content="${escapeHtml(description)}">
-  <link rel="stylesheet" href="/job.css?v=20260720-4">
+  <link rel="stylesheet" href="/job.css?v=20260721-1">
   ${schema ? `<script type="application/ld+json">${safeJson(schema)}</script>` : ""}
 </head>
 <body>
   <header class="job-site-header">
-    <a class="job-brand" href="/" aria-label="Trang chủ Sanvendo"><span>S</span><strong>SANVENDO</strong></a>
-    <a class="header-cta" href="${escapeHtml(applyUrl)}">Ứng tuyển</a>
+    <a class="job-brand" href="${escapeHtml(homeUrl)}" aria-label="Sanvendo"><span>S</span><strong>SANVENDO</strong></a>
+    <nav class="job-language-switcher" aria-label="Language">
+      ${SUPPORTED_LANGUAGES.map((item) => `<a href="${escapeHtml(jobLanguageUrl(sourceJob.id, item))}" class="${item === language ? "active" : ""}" lang="${escapeHtml(LANGUAGE_CONFIG[item].htmlLang)}">${escapeHtml(LANGUAGE_CONFIG[item].label)}</a>`).join("")}
+    </nav>
+    <a class="header-cta" href="${escapeHtml(applyUrl)}">${escapeHtml(text.apply)}</a>
   </header>
   <main class="job-page">
-    <nav class="breadcrumbs" aria-label="Điều hướng"><a href="/">Trang chủ</a><span>›</span><a href="/#jobs">Việc làm</a><span>›</span><span>${escapeHtml(job.title)}</span></nav>
+    <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="${escapeHtml(homeUrl)}">${escapeHtml(text.home)}</a><span>›</span><a href="${escapeHtml(jobsUrl)}">${escapeHtml(text.jobs)}</a><span>›</span><span>${escapeHtml(job.title)}</span></nav>
     <article class="job-detail-page">
       <header class="job-hero">
-        <span class="job-badge">${escapeHtml(job.category)}</span>
+        <span class="job-badge">${escapeHtml(job.categoryLabel)}</span>
         <h1>${escapeHtml(job.title)}</h1>
         <p class="job-company">${escapeHtml(companyName)}</p>
         <div class="job-facts">
-          <div><small>Địa điểm</small><strong>${escapeHtml(job.location)}</strong></div>
-          <div><small>Mức lương</small><strong>${escapeHtml(job.salary)}</strong></div>
-          <div><small>Kinh nghiệm</small><strong>${escapeHtml(job.experience || "Không yêu cầu")}</strong></div>
-          <div><small>Thời gian</small><strong>${escapeHtml(job.workHours || "Trao đổi khi phỏng vấn")}</strong></div>
+          <div><small>${escapeHtml(text.location)}</small><strong>${escapeHtml(job.location)}</strong></div>
+          <div><small>${escapeHtml(text.salary)}</small><strong>${escapeHtml(job.salary)}</strong></div>
+          <div><small>${escapeHtml(text.experience)}</small><strong>${escapeHtml(job.experience || text.noExperience)}</strong></div>
+          <div><small>${escapeHtml(text.workHours)}</small><strong>${escapeHtml(job.workHours || job.employmentTypeLabel || text.interview)}</strong></div>
         </div>
       </header>
       <div class="job-layout">
         <section class="job-content">
-          ${detailHtml || `<h2>Thông tin công việc</h2><p>Vui lòng liên hệ Sanvendo để nhận mô tả chi tiết cho vị trí này.</p>`}
+          ${detailHtml || `<h2>${escapeHtml(text.jobInfo)}</h2><p>${escapeHtml(text.missingDetails)}</p>`}
         </section>
         <aside class="apply-card">
-          <h2>Ứng tuyển vị trí này</h2>
-          <p>Gửi thông tin trước, CV không bắt buộc. Ứng viên không phải trả phí.</p>
-          <a class="primary-button" href="${escapeHtml(applyUrl)}">Gửi hồ sơ ứng tuyển</a>
-          <a class="secondary-button" href="/#jobs">Xem các việc làm khác</a>
+          <h2>${escapeHtml(text.applyTitle)}</h2>
+          <p>${escapeHtml(text.applyNote)}</p>
+          <a class="primary-button" href="${escapeHtml(applyUrl)}">${escapeHtml(text.submitApplication)}</a>
+          <a class="secondary-button" href="${escapeHtml(jobsUrl)}">${escapeHtml(text.otherJobs)}</a>
           <dl>
-            <div><dt>Ngày đăng</dt><dd>${escapeHtml(formatDate(job.createdAt))}</dd></div>
-            ${job.validThrough ? `<div><dt>Hạn ứng tuyển</dt><dd>${escapeHtml(formatDate(job.validThrough))}</dd></div>` : ""}
-            <div><dt>Mã tin</dt><dd>${escapeHtml(job.id)}</dd></div>
+            <div><dt>${escapeHtml(text.datePosted)}</dt><dd>${escapeHtml(formatDate(sourceJob.createdAt, language, text.updating))}</dd></div>
+            ${sourceJob.validThrough ? `<div><dt>${escapeHtml(text.validThrough)}</dt><dd>${escapeHtml(formatDate(sourceJob.validThrough, language, text.updating))}</dd></div>` : ""}
+            <div><dt>${escapeHtml(text.jobId)}</dt><dd>${escapeHtml(sourceJob.id)}</dd></div>
           </dl>
         </aside>
       </div>
     </article>
   </main>
-  <footer class="job-footer-site">© ${new Date().getFullYear()} Sanvendo · Tuyển dụng &amp; Headhunting theo yêu cầu</footer>
+  <footer class="job-footer-site">© ${new Date().getFullYear()} Sanvendo · ${escapeHtml(text.footer)}</footer>
 </body>
 </html>`;
 }
 
-function formatDate(value) {
-  const date = new Date(value || "");
-  if (Number.isNaN(date.getTime())) return "Đang cập nhật";
-  return new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "Asia/Ho_Chi_Minh" }).format(date);
+function buildLocalizedDescriptionHtml(job, text) {
+  const blocks = [];
+
+  if (job.summary) blocks.push(`<p>${escapeHtml(job.summary)}</p>`);
+
+  const sections = [
+    [text.responsibilities, job.responsibilities],
+    [text.requirements, job.requirements],
+    [text.benefits, job.benefits],
+    [text.additionalInfo, job.additionalInfo],
+  ];
+
+  for (const [heading, value] of sections) {
+    const lines = textToParagraphs(value);
+    if (!lines.length) continue;
+    const content = lines.length === 1
+      ? `<p>${escapeHtml(lines[0])}</p>`
+      : `<ul>${lines.map((line) => `<li>${escapeHtml(line)}</li>`).join("")}</ul>`;
+    blocks.push(`<h2>${escapeHtml(heading)}</h2>${content}`);
+  }
+
+  if (job.workHours) blocks.push(`<h2>${escapeHtml(text.workingHours)}</h2><p>${escapeHtml(job.workHours)}</p>`);
+  if (job.experience) blocks.push(`<h2>${escapeHtml(text.experience)}</h2><p>${escapeHtml(job.experience)}</p>`);
+
+  return blocks.join("");
 }
 
-function errorPage(message, status, context) {
-  return new Response(`<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>${status} — Sanvendo</title><link rel="stylesheet" href="/job.css?v=20260720-4"></head><body><main class="error-page"><h1>${status}</h1><p>${escapeHtml(message)}</p><a class="primary-button" href="/">Về trang chủ</a></main></body></html>`, {
+function buildPageTitle(job, language) {
+  if (language === "en") return `${job.title} in ${job.location} — ${SITE_NAME}`;
+  if (language === "zh" || language === "ko") return `${job.title} · ${job.location} — ${SITE_NAME}`;
+  return `${job.title} tại ${job.location} — ${SITE_NAME}`;
+}
+
+function buildApplyUrl(origin, position, language) {
+  const url = new URL("/", origin);
+  url.searchParams.set("apply", "1");
+  url.searchParams.set("position", position);
+  url.searchParams.set("lang", language);
+  url.hash = "candidates";
+  return url.toString();
+}
+
+function jobLanguageUrl(id, language) {
+  return `/jobs/${encodeURIComponent(id)}?lang=${encodeURIComponent(language)}`;
+}
+
+function renderAlternateLinks(job, env) {
+  const canonical = jobUrl(job, env);
+  return [
+    `<link rel="alternate" hreflang="x-default" href="${escapeHtml(`${canonical}?lang=vi`)}">`,
+    ...SUPPORTED_LANGUAGES.map((language) => `<link rel="alternate" hreflang="${escapeHtml(LANGUAGE_CONFIG[language].htmlLang)}" href="${escapeHtml(`${canonical}?lang=${language}`)}">`),
+  ].join("\n  ");
+}
+
+function formatDate(value, language, fallback) {
+  const date = new Date(value || "");
+  if (Number.isNaN(date.getTime())) return fallback;
+  return new Intl.DateTimeFormat(LANGUAGE_CONFIG[language].locale, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: "Asia/Ho_Chi_Minh",
+  }).format(date);
+}
+
+function errorPage(message, status, context, language = "vi") {
+  const config = LANGUAGE_CONFIG[language];
+  const text = pageText(language);
+  const homeUrl = languageUrl("/", language);
+  return new Response(`<!doctype html><html lang="${escapeHtml(config.htmlLang)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>${status} — Sanvendo</title><link rel="stylesheet" href="/job.css?v=20260721-1"></head><body><main class="error-page"><h1>${status}</h1><p>${escapeHtml(message)}</p><a class="primary-button" href="${escapeHtml(homeUrl)}">${escapeHtml(text.backHome)}</a></main></body></html>`, {
     status,
-    headers: pageHeaders(context.request, { "Cache-Control": "no-store" }),
+    headers: pageHeaders(context.request, {
+      "Cache-Control": "no-store",
+      "Content-Language": config.htmlLang,
+    }),
   });
 }
 

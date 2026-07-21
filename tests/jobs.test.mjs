@@ -103,3 +103,34 @@ test("chấp nhận hai nhóm ngành nghề mới", () => {
   assert.equal(factory("Lao động phổ thông").category, "Lao động phổ thông");
   assert.equal(factory("Bán lẻ & Dịch vụ").category, "Bán lẻ & Dịch vụ");
 });
+
+test("lưu bản dịch Anh, Trung và Hàn, bỏ qua trường trống", () => {
+  const job = cleanJobInput({
+    title: "Nhân viên kinh doanh",
+    category: "Kinh doanh",
+    location: "TP. Hồ Chí Minh",
+    salary: "15–20 triệu",
+    translations: {
+      en: {
+        title: "Sales Executive",
+        summary: "Develop B2B customers.",
+        featuredTags: ["B2B", "Sales", "B2B"],
+      },
+      zh: {
+        title: "销售专员",
+        requirements: "良好的沟通能力",
+      },
+      ko: {
+        title: "영업 담당자",
+        benefits: "성과급 지급",
+      },
+      fr: { title: "Doit être ignoré" },
+    },
+  });
+
+  assert.equal(job.translations.en.title, "Sales Executive");
+  assert.deepEqual(job.translations.en.featuredTags, ["B2B", "Sales"]);
+  assert.equal(job.translations.zh.requirements, "良好的沟通能力");
+  assert.equal(job.translations.ko.benefits, "성과급 지급");
+  assert.equal(job.translations.fr, undefined);
+});

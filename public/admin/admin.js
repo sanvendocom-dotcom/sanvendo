@@ -1,3 +1,19 @@
+const TRANSLATION_LANGUAGES = ["en", "zh", "ko"];
+const TRANSLATION_SUFFIXES = { en: "En", zh: "Zh", ko: "Ko" };
+const TRANSLATION_FIELDS = [
+  "title", "companyName", "location", "experience", "salary", "workHours",
+  "summary", "responsibilities", "requirements", "benefits", "additionalInfo",
+  "featuredTags", "targetCandidates", "featuredBadge"
+];
+
+function getTranslationFieldElements(language) {
+  const suffix = TRANSLATION_SUFFIXES[language];
+  return Object.fromEntries(TRANSLATION_FIELDS.map((field) => {
+    const id = `job${field[0].toUpperCase()}${field.slice(1)}${suffix}`;
+    return [field, document.getElementById(id)];
+  }));
+}
+
 const state = {
   jobs: [],
   jobsLoading: false,
@@ -39,6 +55,9 @@ const elements = {
     targetCandidates: document.getElementById("jobTargetCandidates"),
     featuredBadge: document.getElementById("jobFeaturedBadge"),
     published: document.getElementById("jobPublished"),
+    translations: Object.fromEntries(
+      TRANSLATION_LANGUAGES.map((language) => [language, getTranslationFieldElements(language)])
+    ),
     submitButton: document.getElementById("jobSubmitButton"),
     cancelEditButton: document.getElementById("jobCancelEditButton"),
     statusMessage: document.getElementById("jobStatusMessage"),
@@ -197,6 +216,52 @@ async function loadJobs() {
   }
 }
 
+function collectJobTranslations() {
+  const translations = {};
+
+  for (const language of TRANSLATION_LANGUAGES) {
+    const fields = elements.jobs.translations[language];
+    const translation = {};
+
+    for (const field of TRANSLATION_FIELDS) {
+      const element = fields[field];
+      if (!element) continue;
+      if (field === "featuredTags") {
+        const tags = element.value
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean)
+          .slice(0, 3);
+        if (tags.length) translation[field] = tags;
+        continue;
+      }
+
+      const value = element.value.trim();
+      if (value) translation[field] = value;
+    }
+
+    if (Object.keys(translation).length) translations[language] = translation;
+  }
+
+  return translations;
+}
+
+function populateJobTranslations(job) {
+  for (const language of TRANSLATION_LANGUAGES) {
+    const fields = elements.jobs.translations[language];
+    const translation = job.translations?.[language] || {};
+
+    for (const field of TRANSLATION_FIELDS) {
+      const element = fields[field];
+      if (!element) continue;
+      const value = translation[field];
+      element.value = field === "featuredTags" && Array.isArray(value)
+        ? value.join(", ")
+        : String(value || "");
+    }
+  }
+}
+
 async function submitJobForm(event) {
   event.preventDefault();
   hideJobStatus();
@@ -231,6 +296,7 @@ async function submitJobForm(event) {
       .filter(Boolean),
     targetCandidates: elements.jobs.targetCandidates.value.trim(),
     featuredBadge: elements.jobs.featuredBadge.value.trim(),
+    translations: collectJobTranslations(),
     published: elements.jobs.published.checked,
   };
 
@@ -332,6 +398,7 @@ function startEditingJob(job) {
     : "";
   elements.jobs.targetCandidates.value = job.targetCandidates || "";
   elements.jobs.featuredBadge.value = job.featuredBadge || "Mới";
+  populateJobTranslations(job);
   elements.jobs.published.checked = job.published !== false;
   elements.jobs.submitButton.textContent = "Cập nhật tin";
   elements.jobs.editorTitle.textContent = "Chỉnh sửa tin tuyển dụng";
@@ -374,6 +441,11 @@ function createJobRow(job) {
       textElement("span", job.logo || "Không có ký hiệu", "reference"),
       textElement("span", `Cập nhật: ${formatDate(job.updatedAt)}`, "secondary-text"),
       textElement("span", job.summary || "Chưa có nội dung giới thiệu chi tiết", "job-summary-preview"),
+      textElement(
+        "span",
+        `Bản dịch: ${TRANSLATION_LANGUAGES.filter((language) => Object.keys(job.translations?.[language] || {}).length).map((language) => language.toUpperCase()).join(", ") || "chưa có"}`,
+        "secondary-text"
+      ),
     ]),
     createCell([badgeElement(job.category || "Khác")]),
     createCell([

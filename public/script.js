@@ -1,10 +1,23 @@
+const i18n = window.SanvendoI18n || {
+  current: "vi",
+  locale: "vi-VN",
+  t: (value) => value,
+  apply: () => {},
+  localizeJob: (job) => ({ ...job, categoryLabel: job?.category || "" }),
+  categoryLabel: (value) => value || "",
+  employmentTypeLabel: () => "",
+  withLanguage: (value) => value,
+  formatJobCount: (count) => `${count} tin đang tuyển`,
+};
+const tx = (value, params) => i18n.t(value, params);
+
 const menuToggle = document.getElementById("menuToggle");
 const mainNav = document.getElementById("mainNav");
 const toast = document.getElementById("toast");
 
 function showToast(message) {
   if (!toast) return;
-  toast.textContent = message;
+  toast.textContent = tx(message);
   toast.classList.add("show");
   window.clearTimeout(showToast.timer);
   showToast.timer = window.setTimeout(() => {
@@ -178,7 +191,7 @@ async function loadJobs() {
     const result = await parseJson(response);
 
     if (!response.ok || !result.success) {
-      throw new Error(result.message || "Không thể tải tin tuyển dụng.");
+      throw new Error(tx(result.message || "Không thể tải tin tuyển dụng."));
     }
 
     jobs = Array.isArray(result.jobs) ? result.jobs : [];
@@ -195,7 +208,7 @@ async function loadJobs() {
       emptyState.textContent =
         error instanceof Error
           ? error.message
-          : "Không thể tải tin tuyển dụng. Vui lòng thử lại.";
+          : tx("Không thể tải tin tuyển dụng. Vui lòng thử lại.");
       emptyState.classList.remove("hidden");
     }
   } finally {
@@ -216,11 +229,12 @@ function renderJobs() {
 }
 
 function renderFeaturedJob() {
-  const job = jobs.find((item) => item.featured === true) || jobs[0];
-  if (!job || !featuredJobElements.panel) return;
+  const sourceJob = jobs.find((item) => item.featured === true) || jobs[0];
+  if (!sourceJob || !featuredJobElements.panel) return;
+  const job = i18n.localizeJob(sourceJob);
 
   if (featuredJobElements.badge) {
-    featuredJobElements.badge.textContent = job.featuredBadge || "Mới";
+    featuredJobElements.badge.textContent = job.featuredBadge || tx("Mới");
   }
 
   if (featuredJobElements.logo) {
@@ -228,14 +242,14 @@ function renderFeaturedJob() {
   }
 
   if (featuredJobElements.title) {
-    featuredJobElements.title.textContent = job.title || "Vị trí tuyển dụng";
-    featuredJobElements.title.href = `/jobs/${encodeURIComponent(job.id || "")}`;
+    featuredJobElements.title.textContent = job.title || tx("Vị trí tuyển dụng");
+    featuredJobElements.title.href = i18n.withLanguage(`/jobs/${encodeURIComponent(job.id || "")}`);
   }
 
   if (featuredJobElements.meta) {
     featuredJobElements.meta.textContent = [
       job.location,
-      employmentTypeLabels[job.employmentType] || job.workHours || "",
+      job.employmentTypeLabel || job.workHours || "",
     ]
       .filter(Boolean)
       .join(" · ");
@@ -253,12 +267,12 @@ function renderFeaturedJob() {
   }
 
   if (featuredJobElements.salary) {
-    featuredJobElements.salary.textContent = job.salary || "Thỏa thuận";
+    featuredJobElements.salary.textContent = job.salary || tx("Thỏa thuận");
   }
 
   if (featuredJobElements.target) {
     featuredJobElements.target.textContent =
-      job.targetCandidates || "5–8 ứng viên";
+      job.targetCandidates || tx("5–8 ứng viên");
   }
 
   if (featuredJobElements.requestButton) {
@@ -276,19 +290,24 @@ function getFeaturedTags(job) {
   if (configured.length) return configured;
 
   return [...new Set([
-    job.category,
+    job.categoryLabel || i18n.categoryLabel(job.category),
     job.experience,
-    employmentTypeLabels[job.employmentType],
+    job.employmentTypeLabel || i18n.employmentTypeLabel(job.employmentType),
   ].filter(Boolean))].slice(0, 3);
 }
 
-function createJobCard(job) {
+function createJobCard(sourceJob) {
+  const job = i18n.localizeJob(sourceJob);
   const article = document.createElement("article");
   article.className = "job-card";
   article.dataset.title = job.title || "";
-  article.dataset.category = job.category || "";
-  article.dataset.location = job.location || "";
-  article.dataset.searchText = [job.summary, job.responsibilities, job.requirements, job.benefits].filter(Boolean).join(" ");
+  article.dataset.category = sourceJob.category || "";
+  article.dataset.location = sourceJob.location || "";
+  article.dataset.searchText = [
+    sourceJob.title, sourceJob.location, sourceJob.category, sourceJob.summary, sourceJob.responsibilities, sourceJob.requirements, sourceJob.benefits,
+    ...["vi", "en", "zh", "ko"].map((language) => i18n.categoryLabel(sourceJob.category, language)),
+    ...Object.values(sourceJob.translations || {}).flatMap((translation) => [translation?.title, translation?.location, translation?.summary, translation?.responsibilities, translation?.requirements, translation?.benefits])
+  ].filter(Boolean).join(" ");
   article.dataset.jobId = job.id || "";
 
   const top = document.createElement("div");
@@ -301,20 +320,20 @@ function createJobCard(job) {
   const saveButton = document.createElement("button");
   saveButton.className = "save-job";
   saveButton.type = "button";
-  saveButton.setAttribute("aria-label", "Lưu vị trí");
+  saveButton.setAttribute("aria-label", tx("Lưu vị trí"));
   saveButton.textContent = "♡";
 
   top.append(logo, saveButton);
 
   const category = document.createElement("span");
   category.className = "job-category";
-  category.textContent = job.category || "Khác";
+  category.textContent = job.categoryLabel || i18n.categoryLabel(sourceJob.category);
 
   const title = document.createElement("h3");
   const titleLink = document.createElement("a");
   titleLink.className = "job-title-link";
-  titleLink.href = `/jobs/${encodeURIComponent(job.id || "")}`;
-  titleLink.textContent = job.title || "Vị trí tuyển dụng";
+  titleLink.href = i18n.withLanguage(`/jobs/${encodeURIComponent(job.id || "")}`);
+  titleLink.textContent = job.title || tx("Vị trí tuyển dụng");
   title.append(titleLink);
 
   const detail = document.createElement("p");
@@ -323,29 +342,29 @@ function createJobCard(job) {
 
   const summary = document.createElement("p");
   summary.className = "job-card-summary";
-  summary.textContent = job.summary || "Xem nội dung công việc, yêu cầu và quyền lợi của vị trí này.";
+  summary.textContent = job.summary || tx("Xem nội dung công việc, yêu cầu và quyền lợi của vị trí này.");
 
   const footer = document.createElement("div");
   footer.className = "job-footer";
 
   const salary = document.createElement("strong");
-  salary.textContent = job.salary || "Thỏa thuận";
+  salary.textContent = job.salary || tx("Thỏa thuận");
 
   const actions = document.createElement("div");
   actions.className = "job-card-actions";
 
   const detailButton = document.createElement("a");
   detailButton.className = "job-detail-button";
-  detailButton.href = `/jobs/${encodeURIComponent(job.id || "")}`;
+  detailButton.href = i18n.withLanguage(`/jobs/${encodeURIComponent(job.id || "")}`);
   detailButton.dataset.jobDetails = job.id || "";
-  detailButton.textContent = "Xem chi tiết";
+  detailButton.textContent = tx("Xem chi tiết");
 
   const applyButton = document.createElement("button");
   applyButton.type = "button";
   applyButton.className = "job-apply-button";
   applyButton.dataset.openModal = "candidateModal";
   applyButton.dataset.position = job.title || "";
-  applyButton.textContent = "Ứng tuyển";
+  applyButton.textContent = tx("Ứng tuyển");
 
   actions.append(detailButton, applyButton);
   footer.append(salary, actions);
@@ -354,16 +373,17 @@ function createJobCard(job) {
 }
 
 function openJobDetails(jobId) {
-  const job = jobs.find((item) => item.id === jobId);
-  if (!job) return;
+  const sourceJob = jobs.find((item) => item.id === jobId);
+  if (!sourceJob) return;
+  const job = i18n.localizeJob(sourceJob);
 
   jobDetailElements.logo.textContent = job.logo || createInitials(job.title);
-  jobDetailElements.category.textContent = job.category || "Tin tuyển dụng";
-  jobDetailElements.title.textContent = job.title || "Chi tiết công việc";
-  jobDetailElements.meta.textContent = [job.location, job.category].filter(Boolean).join(" · ");
-  jobDetailElements.salary.textContent = job.salary || "Thỏa thuận";
-  jobDetailElements.experience.textContent = job.experience || "Không yêu cầu";
-  jobDetailElements.workHours.textContent = job.workHours || "Trao đổi khi phỏng vấn";
+  jobDetailElements.category.textContent = job.categoryLabel || tx("Tin tuyển dụng");
+  jobDetailElements.title.textContent = job.title || tx("Chi tiết công việc");
+  jobDetailElements.meta.textContent = [job.location, job.categoryLabel].filter(Boolean).join(" · ");
+  jobDetailElements.salary.textContent = job.salary || tx("Thỏa thuận");
+  jobDetailElements.experience.textContent = job.experience || tx("Không yêu cầu");
+  jobDetailElements.workHours.textContent = job.workHours || tx("Trao đổi khi phỏng vấn");
   jobDetailElements.applyButton.dataset.position = job.title || "";
 
   setDetailText(jobDetailElements.summary, job.summary);
@@ -428,9 +448,11 @@ function updateLocationOptions() {
   const locations = [...new Set(jobs.map((job) => job.location).filter(Boolean))]
     .sort((a, b) => a.localeCompare(b, "vi"));
 
-  locationFilter.replaceChildren(new Option("Tất cả địa điểm", ""));
+  locationFilter.replaceChildren(new Option(tx("Tất cả địa điểm"), ""));
   for (const location of locations) {
-    locationFilter.append(new Option(location, location));
+    const sourceJob = jobs.find((job) => job.location === location);
+    const localizedLocation = sourceJob ? i18n.localizeJob(sourceJob).location : location;
+    locationFilter.append(new Option(localizedLocation, location));
   }
 
   locationFilter.value = locations.includes(selected) ? selected : "";
@@ -445,7 +467,7 @@ function updateCategoryCounts() {
   document.querySelectorAll(".category-card[data-category]").forEach((card) => {
     const count = counts.get(card.dataset.category) || 0;
     const label = card.querySelector("[data-category-count]");
-    if (label) label.textContent = `${count} tin đang tuyển`;
+    if (label) label.textContent = i18n.formatJobCount(count);
   });
 }
 
@@ -468,7 +490,7 @@ function filterJobs() {
   });
 
   if (emptyState) {
-    emptyState.textContent = "Không tìm thấy vị trí phù hợp với bộ lọc hiện tại.";
+    emptyState.textContent = tx("Không tìm thấy vị trí phù hợp với bộ lọc hiện tại.");
     emptyState.classList.toggle("hidden", visibleCount > 0 || Boolean(jobLoading && !jobLoading.classList.contains("hidden")));
   }
 }
@@ -478,7 +500,7 @@ locationFilter?.addEventListener("change", filterJobs);
 
 document.querySelectorAll(".category-card[data-category]").forEach((button) => {
   button.addEventListener("click", () => {
-    if (jobFilter) jobFilter.value = button.dataset.category || "";
+    if (jobFilter) jobFilter.value = i18n.categoryLabel(button.dataset.category || "");
     filterJobs();
     document.getElementById("jobs")?.scrollIntoView({ behavior: "smooth" });
   });
@@ -486,7 +508,7 @@ document.querySelectorAll(".category-card[data-category]").forEach((button) => {
 
 document.querySelectorAll("[data-search]").forEach((button) => {
   button.addEventListener("click", () => {
-    const value = button.dataset.search || "";
+    const value = button.textContent.trim() || button.dataset.search || "";
     const heroSearchInput = document.getElementById("heroSearchInput");
     if (heroSearchInput) heroSearchInput.value = value;
     if (jobFilter) jobFilter.value = value;
@@ -509,7 +531,7 @@ jobGrid?.addEventListener("click", (event) => {
 
   const saved = button.classList.toggle("saved");
   button.textContent = saved ? "♥" : "♡";
-  showToast(saved ? "Đã lưu vị trí." : "Đã bỏ lưu vị trí.");
+  showToast(saved ? tx("Đã lưu vị trí.") : tx("Đã bỏ lưu vị trí."));
 });
 
 document.querySelectorAll(".faq-question").forEach((button) => {
@@ -559,12 +581,12 @@ requestForm?.addEventListener("submit", async (event) => {
     return;
   }
 
-  const originalButtonText = requestSubmit?.textContent || "Gửi yêu cầu";
+  const originalButtonText = requestSubmit?.textContent || tx("Gửi yêu cầu");
 
   try {
     if (requestSubmit) {
       requestSubmit.disabled = true;
-      requestSubmit.textContent = "Đang gửi yêu cầu...";
+      requestSubmit.textContent = tx("Đang gửi yêu cầu...");
     }
 
     const response = await fetch("/api/recruitment-request", {
@@ -576,12 +598,12 @@ requestForm?.addEventListener("submit", async (event) => {
 
     if (!response.ok || !result.success || result.stored !== true) {
       throw new Error(
-        result.message ||
-          "Máy chủ chưa xác nhận đã lưu yêu cầu. Vui lòng gửi lại."
+        tx(result.message ||
+          "Máy chủ chưa xác nhận đã lưu yêu cầu. Vui lòng gửi lại.")
       );
     }
 
-    if (requestReference) requestReference.textContent = result.reference || "Đã tiếp nhận";
+    if (requestReference) requestReference.textContent = result.reference || tx("Đã tiếp nhận");
     requestForm.reset();
     requestForm.classList.add("hidden");
     requestSuccess?.classList.remove("hidden");
@@ -589,7 +611,7 @@ requestForm?.addEventListener("submit", async (event) => {
     showRequestError(
       error instanceof Error
         ? error.message
-        : "Không thể gửi yêu cầu. Vui lòng thử lại."
+        : tx("Không thể gửi yêu cầu. Vui lòng thử lại.")
     );
   } finally {
     if (requestSubmit) {
@@ -636,10 +658,10 @@ function validateCvFile(file) {
 
   const extension = getFileExtension(file.name);
   if (!ALLOWED_CV_EXTENSIONS.has(extension)) {
-    return "Chỉ chấp nhận file PDF, DOC hoặc DOCX.";
+    return tx("Chỉ chấp nhận file PDF, DOC hoặc DOCX.");
   }
   if (file.size > MAX_CV_SIZE) {
-    return "Dung lượng CV tối đa là 10 MB.";
+    return tx("Dung lượng CV tối đa là 10 MB.");
   }
   return "";
 }
@@ -665,12 +687,12 @@ candidateForm?.addEventListener("submit", async (event) => {
     return;
   }
 
-  const originalButtonText = candidateSubmit?.textContent || "Gửi hồ sơ";
+  const originalButtonText = candidateSubmit?.textContent || tx("Gửi đơn ứng tuyển");
 
   try {
     if (candidateSubmit) {
       candidateSubmit.disabled = true;
-      candidateSubmit.textContent = "Đang gửi hồ sơ...";
+      candidateSubmit.textContent = tx("Đang gửi hồ sơ...");
     }
 
     const formData = new FormData(candidateForm);
@@ -692,21 +714,21 @@ candidateForm?.addEventListener("submit", async (event) => {
 
     if (!response.ok || !result.success || result.stored !== true) {
       throw new Error(
-        result.message ||
-          "Máy chủ chưa xác nhận đã lưu hồ sơ. Vui lòng gửi lại."
+        tx(result.message ||
+          "Máy chủ chưa xác nhận đã lưu hồ sơ. Vui lòng gửi lại.")
       );
     }
 
-    if (candidateReference) candidateReference.textContent = result.reference || "Đã tiếp nhận";
+    if (candidateReference) candidateReference.textContent = result.reference || tx("Đã tiếp nhận");
     if (candidateSuccessTitle) {
       candidateSuccessTitle.textContent = result.hasCv
-        ? "Hồ sơ và CV đã được gửi thành công"
-        : "Đơn ứng tuyển đã được gửi thành công";
+        ? tx("Hồ sơ và CV đã được gửi thành công")
+        : tx("Đơn ứng tuyển đã được gửi thành công");
     }
     if (candidateSuccessText) {
       candidateSuccessText.firstChild.textContent = result.hasCv
-        ? "Mã hồ sơ: "
-        : "Mã đơn: ";
+        ? `${tx("Mã hồ sơ:")} `
+        : `${tx("Mã đơn:")} `;
     }
     candidateForm.reset();
     candidateForm.classList.add("hidden");
@@ -715,7 +737,7 @@ candidateForm?.addEventListener("submit", async (event) => {
     showCandidateError(
       error instanceof Error
         ? error.message
-        : "Không thể gửi hồ sơ. Vui lòng thử lại."
+        : tx("Không thể gửi hồ sơ. Vui lòng thử lại.")
     );
   } finally {
     if (candidateSubmit) {
@@ -729,7 +751,7 @@ async function parseJson(response) {
   try {
     return await response.json();
   } catch {
-    return { success: false, message: "Máy chủ trả về phản hồi không hợp lệ." };
+    return { success: false, message: tx("Máy chủ trả về phản hồi không hợp lệ.") };
   }
 }
 
@@ -743,4 +765,15 @@ async function applyUrlState() {
   openModal("candidateModal", trigger);
 }
 
-loadJobs().finally(applyUrlState);
+window.addEventListener("sanvendo:languagechange", () => {
+  renderJobs();
+  updateLocationOptions();
+  updateCategoryCounts();
+  filterJobs();
+  i18n.apply();
+});
+
+loadJobs().finally(() => {
+  i18n.apply();
+  applyUrlState();
+});

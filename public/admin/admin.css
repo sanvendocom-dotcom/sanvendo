@@ -886,3 +886,67 @@ textarea {
   background: var(--danger);
   border-color: var(--danger);
 }
+
+.translation-panel {
+  overflow: hidden;
+  background: #fbfcfb;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+
+.translation-panel > summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 18px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.translation-panel > summary::-webkit-details-marker {
+  display: none;
+}
+
+.translation-panel > summary::after {
+  margin-left: auto;
+  color: var(--brand-dark);
+  content: "+";
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.translation-panel[open] > summary::after {
+  content: "−";
+}
+
+.translation-panel > summary strong,
+.translation-panel > summary small {
+  display: block;
+}
+
+.translation-panel > summary strong {
+  font-size: 14px;
+}
+
+.translation-panel > summary small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.translation-code {
+  display: grid;
+  min-width: 52px;
+  height: 34px;
+  place-items: center;
+  color: #fff;
+  background: var(--brand);
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.translation-panel-body {
+  padding: 18px;
+  border-top: 1px solid var(--line);
+}

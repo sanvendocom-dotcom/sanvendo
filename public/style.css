@@ -1709,3 +1709,80 @@ img {
   align-items: center;
   justify-content: center;
 }
+
+/* Language selector: Vietnamese, English, Simplified Chinese and Korean. */
+.language-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  background: #f5f7f5;
+  border-radius: 11px;
+  white-space: nowrap;
+}
+
+.language-switcher button {
+  min-height: 30px;
+  padding: 0 8px;
+  color: #536057;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 850;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.language-switcher button:hover {
+  color: var(--brand-dark);
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.language-switcher button.active {
+  color: var(--white);
+  background: var(--brand);
+  box-shadow: 0 3px 8px rgba(16, 91, 53, 0.18);
+}
+
+@media (max-width: 1120px) {
+  .nav-wrap {
+    gap: 16px;
+  }
+
+  .main-nav {
+    gap: 14px;
+  }
+
+  .language-switcher button {
+    padding-inline: 6px;
+  }
+}
+
+@media (max-width: 860px) {
+  .language-switcher {
+    order: 2;
+    margin-left: auto;
+  }
+
+  .menu-toggle {
+    order: 3;
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .language-switcher button {
+    min-width: 28px;
+    padding-inline: 5px;
+    font-size: 10px;
+  }
+
+  .language-switcher button[data-language="zh"],
+  .language-switcher button[data-language="ko"] {
+    max-width: 42px;
+    overflow: hidden;
+    text-overflow: clip;
+  }
+}
