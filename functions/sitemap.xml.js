@@ -15,6 +15,7 @@ export async function onRequestGet(context) {
 
   const urls = [
     { loc: `${origin}/`, lastmod: latestDate(jobs), priority: "1.0", changefreq: "daily" },
+    { loc: `${origin}/privacy`, lastmod: "2026-07-22", priority: "0.5", changefreq: "yearly" },
     ...jobs.map((job) => ({
       loc: jobUrl(job, context.env),
       lastmod: toDateOnly(job.updatedAt || job.createdAt),

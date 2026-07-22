@@ -134,3 +134,13 @@ test("trang chi tiết hỗ trợ tiếng Nhật", async () => {
   assert.match(html, /B2B営業スタッフ/);
   assert.match(html, /hreflang="ja"/);
 });
+
+test("sitemap có trang chính sách bảo mật", async () => {
+  const { onRequestGet: getSitemap } = await import("../functions/sitemap.xml.js");
+  const response = await getSitemap({
+    request: new Request("https://sanvendo.com/sitemap.xml"),
+    env: {},
+  });
+  const xml = await response.text();
+  assert.match(xml, /<loc>https:\/\/sanvendo\.com\/privacy<\/loc>/);
+});

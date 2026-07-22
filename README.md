@@ -12,35 +12,6 @@ Phiên bản này bao gồm:
 - Kiểm tra chữ ký JWT của Cloudflare Access trước khi cho phép truy cập `/admin`.
 - Chặn truy cập quản trị qua `sanvendo.pages.dev`.
 
-
-## Cấu hình triển khai Cloudflare Pages đã sửa
-
-Bản 3.5.1 đã loại bỏ `wrangler` khỏi `devDependencies` và thay `package-lock.json` bằng lockfile không có gói phụ thuộc. Nhờ vậy Cloudflare chạy `npm clean-install` mà không phải tải thư viện, tránh lỗi:
-
-```text
-npm error Exit handler never called!
-```
-
-Thiết lập dự án Cloudflare Pages:
-
-```text
-Framework preset: None
-Build command: npm run build
-Build output directory: public
-Root directory: /
-Node.js version: 22
-```
-
-Có thể để trống **Build command**; tuy nhiên `npm run build` được khuyến nghị vì lệnh này kiểm tra đủ các tệp bắt buộc trước khi triển khai. Không cần thêm `SKIP_DEPENDENCY_INSTALL` cho bản ZIP này.
-
-Để chạy local mà không cài dependency vào dự án:
-
-```bash
-npm run dev
-```
-
-Lệnh này dùng `npx wrangler@4`.
-
 ## Cấu trúc mới
 
 ```text

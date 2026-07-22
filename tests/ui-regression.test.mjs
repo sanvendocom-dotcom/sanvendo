@@ -17,3 +17,17 @@ test("nút xóa nằm ngay sau tên bản ghi trong hai bảng quản trị", as
   assert.match(html, /<th>Ứng viên<\/th>\s*<th class="action-column">Thao tác<\/th>/);
   assert.match(html, /data-translation-language="ja"/);
 });
+
+test("trang chính sách bảo mật được liên kết và hỗ trợ 5 ngôn ngữ", async () => {
+  const homeHtml = await readFile(new URL("../public/index.html", import.meta.url), "utf8");
+  const privacyHtml = await readFile(new URL("../public/privacy.html", import.meta.url), "utf8");
+  const privacyJs = await readFile(new URL("../public/privacy.js", import.meta.url), "utf8");
+
+  assert.match(homeHtml, /href="\/privacy">Chính sách bảo mật<\/a>/);
+  assert.match(privacyHtml, /<h1 data-i18n="title">Chính sách bảo mật<\/h1>/);
+  assert.match(privacyHtml, /sanvendo\.com@gmail\.com/);
+  for (const language of ["vi", "en", "zh", "ko", "ja"]) {
+    assert.match(privacyHtml, new RegExp(`data-language="${language}"`));
+    assert.match(privacyJs, new RegExp(`\\b${language}: \\{`));
+  }
+});

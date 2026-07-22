@@ -1787,3 +1787,18 @@ img {
     text-overflow: clip;
   }
 }
+
+
+.consent-policy-link {
+  display: block;
+  margin-top: 6px;
+  padding-left: 30px;
+  font-size: 12px;
+}
+
+.consent-policy-link a {
+  color: var(--primary);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
