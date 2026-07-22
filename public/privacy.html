@@ -19,8 +19,8 @@
   <meta property="og:title" content="Chính sách bảo mật — Sanvendo" />
   <meta property="og:description" content="Cách Sanvendo thu thập, sử dụng, lưu trữ và bảo vệ dữ liệu cá nhân." />
   <meta property="og:url" content="https://sanvendo.com/privacy" />
-  <link rel="stylesheet" href="/style.css?v=20260722-1" />
-  <link rel="stylesheet" href="/privacy.css?v=20260722-1" />
+  <link rel="stylesheet" href="/style.css?v=20260722-2" />
+  <link rel="stylesheet" href="/privacy.css?v=20260722-2" />
 </head>
 <body class="privacy-page">
   <header class="site-header privacy-header">
@@ -61,6 +61,37 @@
         </div>
       </aside>
 
+      <div class="privacy-storage-overview" role="list">
+        <article role="listitem">
+          <span class="storage-overview-icon" aria-hidden="true">CV</span>
+          <div>
+            <strong data-i18n="currentCandidateLabel">Hồ sơ ứng viên</strong>
+            <p data-i18n="currentCandidateValue">Lưu trong kho R2 riêng tư; CV không bắt buộc.</p>
+          </div>
+        </article>
+        <article role="listitem">
+          <span class="storage-overview-icon" aria-hidden="true">DN</span>
+          <div>
+            <strong data-i18n="currentRequestLabel">Yêu cầu doanh nghiệp</strong>
+            <p data-i18n="currentRequestValue">Lưu dưới dạng bản ghi JSON trong kho R2 riêng tư.</p>
+          </div>
+        </article>
+        <article role="listitem">
+          <span class="storage-overview-icon" aria-hidden="true">A</span>
+          <div>
+            <strong data-i18n="currentAdminLabel">Quyền truy cập</strong>
+            <p data-i18n="currentAdminValue">Chỉ quản trị viên được xác thực mới có thể xem hoặc xóa.</p>
+          </div>
+        </article>
+        <article role="listitem">
+          <span class="storage-overview-icon" aria-hidden="true">VI</span>
+          <div>
+            <strong data-i18n="currentBrowserLabel">Trình duyệt</strong>
+            <p data-i18n="currentBrowserValue">Chỉ lưu lựa chọn ngôn ngữ, không lưu nội dung biểu mẫu.</p>
+          </div>
+        </article>
+      </div>
+
       <article class="privacy-content">
         <section id="scope">
           <h2><span>1.</span> <span data-i18n="scopeTitle">Phạm vi áp dụng</span></h2>
@@ -88,8 +119,37 @@
           </ul>
         </section>
 
+        <section id="current-storage">
+          <h2><span>4.</span> <span data-i18n="currentStorageTitle">Cách dữ liệu được lưu trong hệ thống hiện tại</span></h2>
+          <p data-i18n="currentStorageIntro">Theo cấu hình website hiện tại, dữ liệu được lưu như sau:</p>
+          <div class="privacy-storage-flow">
+            <article>
+              <span aria-hidden="true">1</span>
+              <div>
+                <h3 data-i18n="currentStorageCandidateTitle">Hồ sơ và CV ứng viên</h3>
+                <p data-i18n="currentStorageCandidateText">Khi có CV, tệp PDF, DOC hoặc DOCX cùng thông tin hồ sơ được lưu trực tiếp trong kho Cloudflare R2 riêng tư. Khi chưa có CV, hệ thống vẫn lưu một bản ghi JSON nhỏ để quản trị viên nhận được thông tin ứng viên.</p>
+              </div>
+            </article>
+            <article>
+              <span aria-hidden="true">2</span>
+              <div>
+                <h3 data-i18n="currentStorageRequestTitle">Yêu cầu tuyển dụng</h3>
+                <p data-i18n="currentStorageRequestText">Thông tin doanh nghiệp và nhu cầu tuyển dụng được lưu thành bản ghi JSON trong cùng kho R2 riêng tư để hiển thị trên trang quản trị.</p>
+              </div>
+            </article>
+            <article>
+              <span aria-hidden="true">3</span>
+              <div>
+                <h3 data-i18n="currentStorageAdminTitle">Truy cập và xóa dữ liệu</h3>
+                <p data-i18n="currentStorageAdminText">Trang quản trị được bảo vệ bằng Cloudflare Access. Chỉ tài khoản quản trị được xác thực mới có thể xem danh sách, tải CV hoặc xóa hồ sơ và yêu cầu khỏi kho lưu trữ.</p>
+              </div>
+            </article>
+          </div>
+          <p class="privacy-note" data-i18n="currentStorageNote">Phiên bản hiện tại không lưu nội dung biểu mẫu ứng viên hoặc doanh nghiệp trong localStorage của trình duyệt và không dùng cơ sở dữ liệu SQL riêng cho các biểu mẫu này.</p>
+        </section>
+
         <section id="sharing">
-          <h2><span>4.</span> <span data-i18n="shareTitle">Chia sẻ và bên nhận dữ liệu</span></h2>
+          <h2><span>5.</span> <span data-i18n="shareTitle">Chia sẻ và bên nhận dữ liệu</span></h2>
           <p data-i18n="shareIntro">Sanvendo chỉ chia sẻ thông tin khi cần thiết và phù hợp với mục đích đã thông báo, bao gồm:</p>
           <ul>
             <li data-i18n="share1">Doanh nghiệp tuyển dụng phù hợp, sau khi có căn cứ xử lý hoặc sự đồng ý cần thiết của ứng viên.</li>
@@ -100,17 +160,17 @@
         </section>
 
         <section id="retention">
-          <h2><span>5.</span> <span data-i18n="retentionTitle">Thời gian lưu trữ</span></h2>
+          <h2><span>6.</span> <span data-i18n="retentionTitle">Thời gian lưu trữ</span></h2>
           <p data-i18n="retentionText">Thông tin được lưu trong thời gian cần thiết để xử lý yêu cầu tuyển dụng, duy trì quan hệ với ứng viên hoặc doanh nghiệp, giải quyết tranh chấp và đáp ứng nghĩa vụ pháp lý. Khi không còn cần thiết, Sanvendo sẽ xóa, ẩn danh hoặc hạn chế xử lý theo quy trình phù hợp.</p>
         </section>
 
         <section id="security">
-          <h2><span>6.</span> <span data-i18n="securityTitle">Bảo mật thông tin</span></h2>
+          <h2><span>7.</span> <span data-i18n="securityTitle">Bảo mật thông tin</span></h2>
           <p data-i18n="securityText">Sanvendo áp dụng các biện pháp quản trị và kỹ thuật hợp lý như kiểm soát truy cập trang quản trị, giới hạn loại và dung lượng tệp, kiểm tra tệp tải lên và sử dụng hạ tầng lưu trữ được bảo vệ. Tuy nhiên, không có phương thức truyền hoặc lưu trữ điện tử nào an toàn tuyệt đối.</p>
         </section>
 
         <section id="rights">
-          <h2><span>7.</span> <span data-i18n="rightsTitle">Quyền của bạn</span></h2>
+          <h2><span>8.</span> <span data-i18n="rightsTitle">Quyền của bạn</span></h2>
           <p data-i18n="rightsIntro">Trong phạm vi pháp luật áp dụng và sau khi xác minh danh tính, bạn có thể yêu cầu:</p>
           <ul>
             <li data-i18n="right1">Được biết và truy cập thông tin cá nhân Sanvendo đang xử lý.</li>
@@ -123,22 +183,22 @@
         </section>
 
         <section id="storage">
-          <h2><span>8.</span> <span data-i18n="storageTitle">Cookie và bộ nhớ trình duyệt</span></h2>
+          <h2><span>9.</span> <span data-i18n="storageTitle">Cookie và bộ nhớ trình duyệt</span></h2>
           <p data-i18n="storageText">Website có thể lưu lựa chọn ngôn ngữ trong bộ nhớ cục bộ của trình duyệt và sử dụng các dữ liệu kỹ thuật thiết yếu để vận hành, bảo mật dịch vụ. Hiện tại, Sanvendo không sử dụng chức năng này để theo dõi quảng cáo của bên thứ ba.</p>
         </section>
 
         <section id="children">
-          <h2><span>9.</span> <span data-i18n="childrenTitle">Thông tin của người chưa thành niên</span></h2>
+          <h2><span>10.</span> <span data-i18n="childrenTitle">Thông tin của người chưa thành niên</span></h2>
           <p data-i18n="childrenText">Dịch vụ chủ yếu dành cho người có nhu cầu việc làm và đại diện doanh nghiệp. Người chưa thành niên chỉ nên cung cấp dữ liệu khi có sự đồng ý hoặc giám sát phù hợp của cha mẹ, người giám hộ theo pháp luật.</p>
         </section>
 
         <section id="changes">
-          <h2><span>10.</span> <span data-i18n="changesTitle">Thay đổi chính sách</span></h2>
+          <h2><span>11.</span> <span data-i18n="changesTitle">Thay đổi chính sách</span></h2>
           <p data-i18n="changesText">Sanvendo có thể cập nhật chính sách để phản ánh thay đổi của dịch vụ hoặc quy định pháp luật. Phiên bản mới sẽ được đăng tại trang này và ghi rõ ngày cập nhật.</p>
         </section>
 
         <section id="contact" class="privacy-contact-card">
-          <h2><span>11.</span> <span data-i18n="contactTitle">Liên hệ về quyền riêng tư</span></h2>
+          <h2><span>12.</span> <span data-i18n="contactTitle">Liên hệ về quyền riêng tư</span></h2>
           <p data-i18n="contactText">Để yêu cầu truy cập, sửa, xóa dữ liệu hoặc đặt câu hỏi về chính sách này, vui lòng liên hệ:</p>
           <a href="mailto:sanvendo.com@gmail.com">sanvendo.com@gmail.com</a>
           <p class="privacy-contact-tip" data-i18n="contactTip">Vui lòng mô tả yêu cầu và cung cấp thông tin đủ để Sanvendo xác minh đúng hồ sơ cần xử lý.</p>
@@ -154,6 +214,6 @@
     </div>
   </footer>
 
-  <script src="/privacy.js?v=20260722-1"></script>
+  <script src="/privacy.js?v=20260722-2"></script>
 </body>
 </html>

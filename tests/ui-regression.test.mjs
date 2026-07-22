@@ -26,6 +26,9 @@ test("trang chính sách bảo mật được liên kết và hỗ trợ 5 ngôn
   assert.match(homeHtml, /href="\/privacy">Chính sách bảo mật<\/a>/);
   assert.match(privacyHtml, /<h1 data-i18n="title">Chính sách bảo mật<\/h1>/);
   assert.match(privacyHtml, /sanvendo\.com@gmail\.com/);
+  assert.match(privacyHtml, /id="current-storage"/);
+  assert.match(privacyHtml, /Cloudflare R2 riêng tư/);
+  assert.match(homeHtml, /href="\/privacy#current-storage">Chính sách bảo mật &amp; lưu dữ liệu<\/a>/);
   for (const language of ["vi", "en", "zh", "ko", "ja"]) {
     assert.match(privacyHtml, new RegExp(`data-language="${language}"`));
     assert.match(privacyJs, new RegExp(`\\b${language}: \\{`));
